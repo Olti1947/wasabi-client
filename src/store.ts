@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
-import { persistReducer, persistStore } from 'redux-persist';
-import authReducer from '../features/auth/authSlice';
+import { Persistor, persistReducer, persistStore } from 'redux-persist';
+import authReducer from './features/auth/authSlice';
 
 // Persist config
 const persistConfig = {
@@ -28,16 +28,15 @@ export const store = configureStore({
     }),
 });
 
-export const persistor = persistStore(store);
+// --- Create persistor on client only ---
+export const getPersistor = (): Persistor | null => {
+  if (typeof window === 'undefined') return null; // SSR safe
+  return persistStore(store);
+};
 
 // --- Types ---
-// Infer the `RootState` type from the store itself
 export type RootState = ReturnType<typeof store.getState>;
-
-// Inferred type: {auth: AuthState, ...}
 export type AppDispatch = typeof store.dispatch;
-
-// For async actions (Thunk)
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
   RootState,

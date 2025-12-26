@@ -1,8 +1,8 @@
 // src/services/api.ts
 import axios from 'axios';
 import Constants from 'expo-constants';
-import { store } from '../app/store';
 import { logout, refreshToken } from '../features/auth/authSlice';
+import { store } from '../store';
 
 const api = axios.create({
   baseURL: Constants.expoConfig?.extra?.API_URL, // or http://localhost:8080 if local

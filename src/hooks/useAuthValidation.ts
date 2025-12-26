@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import api from '../api/apiClient';
-import { store } from '../app/store';
 import { selectIsAuthenticated, selectRefreshToken, selectToken } from '../features/auth/authSelectors';
 import { logout, setToken } from '../features/auth/authSlice';
+import { store } from '../store';
 
 export const useAuthValidation = () => {
   const dispatch = useDispatch();

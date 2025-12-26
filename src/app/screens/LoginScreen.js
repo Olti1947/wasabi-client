@@ -1,6 +1,7 @@
 import { selectIsAuthenticated } from '@/src/features/auth/authSelectors';
 import { colors } from '@/src/theme/colors';
 import { useFonts } from 'expo-font';
+import { router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Formik } from 'formik';
 import { useCallback, useState } from 'react';
@@ -51,7 +52,7 @@ export const LoginScreen = () => {
       const resultAction = await dispatch(loginUser(values));
       if (loginUser.fulfilled.match(resultAction)) {
         console.log('✅ Login successful:', resultAction.payload);
-        navigation.replace('Home');
+        router.replace('/(tabs)');
       } else {
         console.log('❌ Login failed:', resultAction.payload || 'Unknown error');
       }
@@ -169,7 +170,7 @@ export const LoginScreen = () => {
                   )}
 
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('Forget')}
+                    onPress={() => router.navigate('Forget')}
                   >
                     <Text style={styles.forgotPassword}>Forgot Password?</Text>
                   </TouchableOpacity>
@@ -188,7 +189,7 @@ export const LoginScreen = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('SignUp')}
+                    onPress={() => router.navigate('SignUp')}
                   >
                     <Text style={styles.signUp}>
                       Don’t have an account?{' '}
