@@ -2,9 +2,8 @@ import { selectIsAuthenticated } from '@/src/features/auth/authSelectors';
 import { colors } from '@/src/theme/colors';
 import { useFonts } from 'expo-font';
 import { router } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import { Formik } from 'formik';
-import { useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -21,11 +20,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as yup from 'yup';
 import { loginUser } from '../../features/auth/authSlice';
 
-// Prevent splash screen from auto-hiding before fonts are loaded
-SplashScreen.preventAutoHideAsync();
+// Prevent splash screen from auto-hiding on app load
+// SplashScreen.preventAutoHideAsync();
 
 export const LoginScreen = () => {
   const [appIsReady, setAppIsReady] = useState(false);
+
   const [fontsLoaded] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
@@ -63,14 +63,19 @@ export const LoginScreen = () => {
     }
   };
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-      setAppIsReady(true);
+  // Hide splash screen when app is ready
+  useEffect(() => {
+    async function prepare() {
+      if (fontsLoaded) {
+        // await SplashScreen.hideAsync();
+        setAppIsReady(true);
+      }
     }
+    prepare();
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !appIsReady) {
+    // Keep splash screen visible until fonts and other startup tasks are ready
     return null;
   }
 
@@ -78,7 +83,6 @@ export const LoginScreen = () => {
     return (
       <SafeAreaView
         style={[styles.container, { paddingTop: insets.top }]}
-        onLayout={onLayoutRootView}
       >
         <Text style={{ color: '#fff', fontSize: 18, marginTop: 100 }}>
           You are already logged in
@@ -90,7 +94,6 @@ export const LoginScreen = () => {
   return (
     <SafeAreaView
       style={[styles.container, { paddingTop: insets.top }]}
-      onLayout={onLayoutRootView}
     >
       {/* Background Image */}
       <Image
