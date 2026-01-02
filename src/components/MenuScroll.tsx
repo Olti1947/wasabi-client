@@ -1,17 +1,28 @@
 import { FlashList } from '@shopify/flash-list';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+// import { useInfiniteQuery } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
 import {
-  ActivityIndicator,
-  RefreshControl,
-  StyleSheet,
-  useWindowDimensions // <-- IMPORT THE HOOK
-  ,
+    ActivityIndicator,
+    RefreshControl,
+    StyleSheet,
+    useWindowDimensions // <-- IMPORT THE HOOK
+    ,
 
 
-  View
+
+
+
+
+
+
+    View
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchFoodItems, resetFoodItems } from '../features/food/foodSlice';
+import { FoodItem } from '../features/food/foodTypes';
+import { AppDispatch } from '../store';
 import FoodCard from './FoodCard';
+
 
 // --- CONSTANTS ---
 const MINIMUM_CARD_WIDTH = 180; // Smallest acceptable width for a single card
@@ -32,20 +43,51 @@ interface MenuScrollProps {
     ListHeaderComponent: React.ReactElement | null;
 }
 
-const fetchImages = async ({ pageParam = 1 }): Promise<Page> => {
-    await new Promise(resolve => setTimeout(resolve, 500)); 
+// const fetchImages = async ({ pageParam = 1 }): Promise<Page> => {
+//     try{
+//         const response = await axios.get('/api/foods', {
 
-    const images = Array.from({ length: 10 }, (_, index) => ({
-        id: `img-${pageParam}-${index}-${Date.now()}`, 
-        url: `https://picsum.photos/300/200?random=${pageParam * 10 + index}`, 
-    }));
+//         })
+//     }
+
+//     // const images = Array.from({ length: 10 }, (_, index) => ({
+//     //     id: `img-${pageParam}-${index}-${Date.now()}`, 
+//     //     url: `https://picsum.photos/300/200?random=${pageParam * 10 + index}`, 
+//     // }));
     
-    const nextPage = pageParam < 5 ? pageParam + 1 : 0; 
-    return { images, nextPage: nextPage };
-};
+//     const nextPage = pageParam < 5 ? pageParam + 1 : 0; 
+//     return { images, nextPage: nextPage };
+// };
 
 export default function MenuScroll({ ListHeaderComponent }: MenuScrollProps) {
-    const { width: screenWidth } = useWindowDimensions();
+     const { width: screenWidth } = useWindowDimensions();
+const dispatch = useDispatch<AppDispatch>();
+
+const foodState = useSelector((state: any) => state.food) ?? {
+  items: [],
+  loading: false,
+  page: 0,
+  totalPages: 1,
+};
+
+const {items, loading, page, totalPages} = foodState;
+
+console.log("Food Items:", items);
+
+useEffect(()=>{
+    dispatch(fetchFoodItems({page: 0, size: 10}));
+},[dispatch])
+
+const loadMore = () => {
+    if(!loading && page < totalPages){
+        dispatch(fetchFoodItems({page, size: 10}));
+    }
+}
+
+const onRefresh = () => {
+  dispatch(resetFoodItems());
+  dispatch(fetchFoodItems({ page: 0, size: 10 }));
+};
 
     // 2. Wrap all calculations in useMemo to recalculate ONLY when screenWidth changes
     const { DYNAMIC_COLUMN_COUNT, cardWrapperStyle } = useMemo(() => {
@@ -79,30 +121,30 @@ export default function MenuScroll({ ListHeaderComponent }: MenuScrollProps) {
     }, [screenWidth]); // <-- Dependency array ensures this runs on resize
 
     // TanStack Query logic (remains the same)
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        refetch,
-        isRefetching,
-    } = useInfiniteQuery({
-        queryKey: ['images'],
-        initialPageParam: 1, 
-        queryFn: fetchImages,
-        getNextPageParam: (lastPage) => lastPage.nextPage,
-    });
+    // const {
+    //     data,
+    //     fetchNextPage,
+    //     hasNextPage,
+    //     isFetchingNextPage,
+    //     refetch,
+    //     isRefetching,
+    // } = useInfiniteQuery({
+    //     queryKey: ['images'],
+    //     initialPageParam: 1, 
+    //     queryFn: fetchImages,
+    //     getNextPageParam: (lastPage) => lastPage.nextPage,
+    // });
 
-    const images = useMemo(
-        () => data?.pages.flatMap((page) => page.images) || [],
-        [data]
-    );
+    // const images = useMemo(
+    //     () => data?.pages.flatMap((page) => page.images) || [],
+    //     [data]
+    // );
 
     return (
         <View style={styles.container}>
             <FlashList
-                data={images}
-                keyExtractor={(item) => item.id}
+                data={items}
+                keyExtractor={(item: FoodItem) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
                 
                 // Set the calculated number of columns
@@ -113,29 +155,29 @@ export default function MenuScroll({ ListHeaderComponent }: MenuScrollProps) {
 
                 refreshControl={
                     <RefreshControl
-                        tintColor={'blue'}
-                        refreshing={isRefetching}
-                        onRefresh={refetch}
+                        tintColor={'green'}
+                        refreshing={loading}
+                        onRefresh={onRefresh}
                     />
                 }
                 renderItem={({ item }) => (
                     // 3. Apply the calculated style directly
                     <View style={cardWrapperStyle}>
                         <FoodCard 
-                            id={parseInt(item.id.replace(/\D/g, ''))} 
-                            name={`Food Item ${item.id}`} 
-                            imageUrl={item.url} 
-                            description="Delicious food item" 
-                            price={9.99} 
+                            id={parseInt(item.id.toString())} 
+                            name={item.name} 
+                            imageUrl={item.imageUrl} 
+                            description={item.description} 
+                            price={item.price} 
                         />
                     </View>
                 )}
                 onEndReachedThreshold={0.2}
-                onEndReached={() => hasNextPage && !isFetchingNextPage && fetchNextPage()} 
+                onEndReached={loadMore} 
                 ListFooterComponent={
-                    isFetchingNextPage ? (
+                    loading ? (
                         <ActivityIndicator
-                            color="blue"
+                            color="green"
                             size="large"
                             style={styles.footer}
                         />

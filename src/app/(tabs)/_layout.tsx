@@ -10,9 +10,7 @@ if (!isAuthenticated){
 }
 
     return <Tabs
-    screenOptions={{
-        headerShown: false
-    }}
+    screenOptions={{headerShown: false}}
     >
         <Tabs.Screen name = "index" options={{title: "Home"}} />
     </Tabs>;
