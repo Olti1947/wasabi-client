@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { setApiAuth } from '../api/apiClient';
@@ -26,6 +26,6 @@ export default function Index(){
    }, [isAuthenticated])
    
     return (
-      <LoginScreen />
+   <Redirect href="/(auth)/login" />
     )
 }
