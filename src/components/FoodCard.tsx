@@ -1,7 +1,11 @@
 import { Image } from 'expo-image';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../features/cart/cartSlice';
+import { AppDispatch, store } from '../store';
 import { colors } from '../theme/colors';
+
 
 type FoodCardProps = {
   id: number;
@@ -12,10 +16,15 @@ type FoodCardProps = {
 };
 
 const FoodCard = ({ id, name, imageUrl, description, price }: FoodCardProps) => {
-
+  const [cartText, setCartText] = React.useState('Add to Cart');
+  
+  const dispatch = useDispatch<AppDispatch>();
   const handleAddToCart = () => {
     // Handle add to cart action
-    console.log(`Added food item with id ${id} to cart`);
+    dispatch(addToCart({ id, name, description, price, imageUrl, quantity: 1 }));
+    setCartText('Added to Cart ✓');
+    setTimeout(() => setCartText('Add to Cart'), 2000);
+    console.log(store.getState().cart);
   };
 
   return (
@@ -30,7 +39,7 @@ const FoodCard = ({ id, name, imageUrl, description, price }: FoodCardProps) => 
         <Text style={styles.foodDescription}>{description}</Text>
         <Text style={styles.price}>${price.toFixed(2)}</Text>
         <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
-          <Text style={styles.buttonText}>Add to Cart</Text>
+          <Text style={styles.buttonText}>{cartText}</Text>
         </TouchableOpacity>
       </View>
     </View>

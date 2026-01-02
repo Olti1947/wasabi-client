@@ -3,19 +3,21 @@ import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 import { Persistor, persistReducer, persistStore } from 'redux-persist';
 import authReducer from './features/auth/authSlice';
+import cartReducer from './features/cart/cartSlice';
 import foodReducer from './features/food/foodSlice';
 
   // Persist config
   const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
-    whitelist: ['auth'], // only persist auth slice
+    whitelist: ['auth','cart'], // only persist auth and cart slices
   };
 
   // Root reducer
   const rootReducer = combineReducers({
     auth: authReducer,
     food: foodReducer,
+    cart: cartReducer,
   });
 
   // Persisted reducer
