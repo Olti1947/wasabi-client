@@ -1,17 +1,26 @@
-// src/services/api.ts
 import axios from 'axios';
 import Constants from 'expo-constants';
-import { logout, refreshToken } from '../features/auth/authSlice';
-import { store } from '../store';
+import { logout } from '../features/auth/authSlice';
+
+type TokenProvider = () => string | null;
+type RefreshHandler = () => Promise<string>;
+
+let getToken: TokenProvider;
+let onRefresh: RefreshHandler;
+
+export const setApiAuth = (tokenProvider: TokenProvider, refreshHandler: RefreshHandler) => {
+  getToken = tokenProvider;
+  onRefresh = refreshHandler;
+};
 
 const api = axios.create({
-  baseURL: Constants.expoConfig?.extra?.API_URL, // or http://localhost:8080 if local
+  baseURL: Constants.expoConfig?.extra?.API_URL,
 });
 
 // Attach access token before requests
 api.interceptors.request.use(
   (config) => {
-    const token = store.getState().auth.token;
+    const token = getToken?.();
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
@@ -31,8 +40,12 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    if ((error.response?.status === 403 || error.response?.status === 401
+    ) && !originalRequest._retry) {
+      if (!onRefresh) {
+        return Promise.reject(error);
+      }
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           queue.push({ resolve, reject });
@@ -45,21 +58,15 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const { refreshToken: refresh } = store.getState().auth;
-      if (!refresh) {
-        store.dispatch(logout());
-        return Promise.reject(error);
-      }
-
       try {
-        const response = await store.dispatch(refreshToken(refresh)).unwrap();
-        processQueue(null, response.authenticationToken);
+        const newToken = await onRefresh();
+        processQueue(null, newToken);
 
-        originalRequest.headers['Authorization'] = `Bearer ${response.authenticationToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        store.dispatch(logout());
+        logout(); // optional: dispatch logout outside if you want
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

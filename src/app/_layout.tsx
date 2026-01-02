@@ -20,7 +20,9 @@ export default function RootLayout() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
-          <Stack />
+          <Stack
+            screenOptions={{headerShown: false}}
+          />
         </QueryClientProvider>
       </PersistGate>
     </Provider>

@@ -1,6 +1,5 @@
+import api from "@/src/api/apiClient";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from 'axios';
-import Constants from "expo-constants";
 import { FoodItem } from "./foodTypes";
 
 interface FetchFoodParams {
@@ -11,7 +10,7 @@ interface FetchFoodParams {
 export const fetchFoodItems = createAsyncThunk(
     'food/fetchFoodItems',
     async ({page = 0, size = 10}: FetchFoodParams, {getState}) => {
-        const response = await axios.get (`${Constants.expoConfig?.extra?.API_URL}/api/foods?page=${page}&size=${size}`);
+        const response = await api.get (`/api/foods?page=${page}&size=${size}`);
     return response.data;
     }
 );
@@ -19,7 +18,7 @@ export const fetchFoodItems = createAsyncThunk(
 const  foodSlice = createSlice({
     name: 'food',
     initialState: {
-        items: [] as never | FoodItem[],
+        items: [] as FoodItem[],
         loading: false,
         page: 0,
         totalPages: 1,
@@ -36,11 +35,11 @@ const  foodSlice = createSlice({
         state.loading = true;
     })
         .addCase(fetchFoodItems.fulfilled, (state, action) => { 
-        state.loading = false;
-        const {content, totalPages} = action.payload;
+            state.loading = false;
+        const {content, totalPages, number} = action.payload;
         state.items = [...state.items, ...content];
         state.totalPages = totalPages;
-        state.page += 1;
+        state.page = number + 1;
     })
         .addCase(fetchFoodItems.rejected, (state) => {
         state.loading = false; 

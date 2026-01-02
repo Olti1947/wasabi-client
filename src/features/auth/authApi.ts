@@ -22,7 +22,7 @@ export const signUpRequest = async (request: SignUpRequest): Promise<AuthRespons
 
 export const refreshTokenRequest = async (refreshToken: string): Promise<AuthResponse> => {
   const response = await axios.post<AuthResponse>(
-    `${API_URL}/refresh-token`, 
+    `${API_URL}/refresh`, 
     { token: refreshToken }, 
     { headers: { 'Content-Type': 'application/json' }}
   );
