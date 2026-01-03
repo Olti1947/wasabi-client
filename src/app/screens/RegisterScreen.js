@@ -5,26 +5,27 @@ import { router } from 'expo-router';
 import { Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import * as yup from 'yup';
-import { loginUser } from '../../features/auth/authSlice';
+import { signUpUser } from '../../features/auth/authSlice';
 
 // Prevent splash screen from auto-hiding on app load
 // SplashScreen.preventAutoHideAsync();
 
-export const LoginScreen = () => {
+export const RegisterScreen = () => {
   const [appIsReady, setAppIsReady] = useState(false);
+  const error = useSelector(selectError);
 
   const [fontsLoaded] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
@@ -35,9 +36,16 @@ export const LoginScreen = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(selectIsAuthenticated);
   const { loading = false } = useSelector((state) => state.auth || {});
-  const error = useSelector(selectError);
 
   const loginValidationSchema = yup.object().shape({
+    firstName: yup
+      .string()
+      .min(2, ({ min }) => `Name must be at least ${min} characters`)
+      .required('Name is required'),
+    lastName: yup
+      .string()
+      .min(2, ({ min }) => `Last Name must be at least ${min} characters`)
+      .required('Last Name is required'),
     email: yup
       .string()
       .email('Please enter a valid email')
@@ -46,19 +54,26 @@ export const LoginScreen = () => {
       .string()
       .min(6, ({ min }) => `Password must be at least ${min} characters`)
       .required('Password is required'),
+      confirmPassword: yup
+      .string()
+      .oneOf([yup.ref('password'), null], 'Passwords must match')
+      .required('Confirm Password is required'),
   });
 
   const handleLogin = async (values, { setSubmitting }) => {
+              const { confirmPassword, ...payload } = values;
+
     try {
-      const resultAction = await dispatch(loginUser(values));
-      if (loginUser.fulfilled.match(resultAction)) {
-        console.log('✅ Login successful:', resultAction.payload);
+
+      const resultAction = await dispatch(signUpUser(payload));
+      if (signUpUser.fulfilled.match(resultAction)) {
+        console.log('✅ Sign up successful:', resultAction.payload);
         router.replace('/(tabs)');
       } else {
-        console.log('❌ Login failed:', resultAction.payload || 'Unknown error');
+        console.log('❌ Sign up failed:', resultAction.payload || 'Unknown error');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Sign up error:', error);
     } finally {
       setSubmitting(false);
     }
@@ -105,9 +120,9 @@ export const LoginScreen = () => {
 
       {/* Header Area */}
       <View style={styles.headerArea}>
-        <Text style={styles.title}>Log In</Text>
+        <Text style={styles.title}>Sign up</Text>
         <Text style={styles.paragraph}>
-          Please sign in to your existing account
+          Please create your account to continue.
         </Text>
       </View>
 
@@ -123,12 +138,13 @@ export const LoginScreen = () => {
           ]}
         >
           <ScrollView
-            contentContainerStyle={{ paddingBottom: 40 }}
-            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 60 }}
+            showsVerticalScrollIndicator={true}
           >
             <Formik
               validationSchema={loginValidationSchema}
-              initialValues={{ email: '', password: '' }}
+              initialValues={{firstName:'', lastName:'', email: '', password: '', confirmPassword: '' }}
               onSubmit={handleLogin}
             >
               {({
@@ -142,6 +158,38 @@ export const LoginScreen = () => {
                 isSubmitting,
               }) => (
                 <>
+                <Text style={styles.fieldPlaceHolder}>FIRST NAME</Text>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="First Name"
+                      keyboardType="default"
+                      autoCapitalize="none"
+                      onChangeText={handleChange('firstName')}
+                      onBlur={handleBlur('firstName')}
+                      value={values.firstName}
+                    />
+                  </View>
+                  {errors.firstName && touched.firstName && (
+                    <Text style={styles.errorText}>{errors.firstName}</Text>
+                  )}
+
+                <Text style={styles.fieldPlaceHolder}>LAST NAME</Text>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Last Name"
+                      keyboardType="default"
+                      autoCapitalize="none"
+                      onChangeText={handleChange('lastName')}
+                      onBlur={handleBlur('lastName')}
+                      value={values.lastName}
+                    />
+                  </View>
+                  {errors.lastName && touched.lastName && (
+                    <Text style={styles.errorText}>{errors.lastName}</Text>
+                  )}
+
                   <Text style={styles.fieldPlaceHolder}>EMAIL</Text>
                   <View style={styles.inputContainer}>
                     <TextInput
@@ -173,12 +221,23 @@ export const LoginScreen = () => {
                     <Text style={styles.errorText}>{errors.password}</Text>
                   )}
 
-                  <TouchableOpacity
-                    onPress={() => router.navigate('Forget')}
-                  >
-                    <Text style={styles.forgotPassword}>Forgot Password?</Text>
-                  </TouchableOpacity>
-                   {error && <Text style={styles.errorText}>{error.message}</Text>}
+                  <Text style={styles.fieldPlaceHolder}>CONFIRM PASSWORD</Text>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Confirm Password"
+                      secureTextEntry
+                      onChangeText={handleChange('confirmPassword')}
+                      onBlur={handleBlur('confirmPassword')}
+                      value={values.confirmPassword}
+                    />
+                  </View>
+                  {errors.confirmPassword && touched.confirmPassword && (
+                    <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                  )}
+
+                {error && <Text style={styles.errorText}>{error.message}</Text>}
+                  
                   <TouchableOpacity
                     style={[
                       styles.button,
@@ -188,16 +247,16 @@ export const LoginScreen = () => {
                     disabled={!isValid || isSubmitting}
                   >
                     <Text style={styles.buttonText}>
-                      {isSubmitting ? 'Logging in...' : 'Login'}
+                      {isSubmitting ? 'Signing up...' : 'Sign Up'}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => router.push('/(auth)/register')}
+                    onPress={() => router.navigate('/(auth)/login')}
                   >
                     <Text style={styles.signUp}>
-                      Don’t have an account?{' '}
-                      <Text style={styles.signUpLink}>Sign Up</Text>
+                      Already have an account?{' '}
+                      <Text style={styles.signUpLink}>Log in</Text>
                     </Text>
                   </TouchableOpacity>
                 </>
@@ -210,7 +269,7 @@ export const LoginScreen = () => {
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -224,17 +283,24 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  headerTextContainer: {
+  justifyContent: 'center', // vertical center of this container
+  alignItems: 'center',     // horizontal center
+},
   headerArea: {
-    position: 'absolute',
-    top: '15%',
+    height: 120,
     zIndex: 5,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 40,
+    paddingHorizontal:20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: colors.white,
     fontFamily: 'Poppins-Bold',
+    textAlign: 'center',
   },
   paragraph: {
     fontSize: 16,
@@ -255,6 +321,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
     paddingTop: 20,
+    maxHeight: '70%',
+    marginTop: '35%',
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 10,
