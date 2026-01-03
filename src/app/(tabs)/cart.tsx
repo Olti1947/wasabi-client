@@ -28,9 +28,21 @@ const phonePattern = /^\d{3} \d{3} \d{3}$/
     setError("Phone number must be in the format XXX XXX XXX (e.g., 045 123 456).");
     return;
   }
-
+    setError("");
     alert(`Order placed!\nTotal: $${totalPrice}\nPhone: ${phone}\nAddress: ${address}`);
   };
+
+  const formatKosovoPhone = (input: string) => {
+  // Remove any non-digit characters
+  const digits = input.replace(/\D/g, '');
+  // Insert spaces after 3 and 6 digits
+  const part1 = digits.substring(0, 3);
+  const part2 = digits.substring(3, 6);
+  const part3 = digits.substring(6, 9);
+
+  return [part1, part2, part3].filter(Boolean).join(' ');
+};
+
 
   if (cartItems.length === 0) {
     return (
@@ -62,7 +74,7 @@ const phonePattern = /^\d{3} \d{3} \d{3}$/
           placeholder="Phone Number"
           keyboardType="phone-pad"
           value={phone}
-          onChangeText={setPhone}
+            onChangeText={(text) => setPhone(formatKosovoPhone(text))}
         />
 
         <TextInput
