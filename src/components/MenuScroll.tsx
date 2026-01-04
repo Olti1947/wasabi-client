@@ -3,16 +3,9 @@ import { FlashList } from '@shopify/flash-list';
 import { useEffect, useMemo } from 'react';
 import {
     ActivityIndicator,
-    RefreshControl,
     StyleSheet,
     useWindowDimensions // <-- IMPORT THE HOOK
     ,
-
-
-
-
-
-
 
 
     View
@@ -41,6 +34,7 @@ interface Page {
 
 interface MenuScrollProps {
     ListHeaderComponent: React.ReactElement | null;
+    search: string;
 }
 
 // const fetchImages = async ({ pageParam = 1 }): Promise<Page> => {
@@ -59,134 +53,76 @@ interface MenuScrollProps {
 //     return { images, nextPage: nextPage };
 // };
 
-export default function MenuScroll({ ListHeaderComponent }: MenuScrollProps) {
-     const { width: screenWidth } = useWindowDimensions();
-const dispatch = useDispatch<AppDispatch>();
+export default function MenuScroll({ ListHeaderComponent, search }: MenuScrollProps) {
+  const { width: screenWidth } = useWindowDimensions();
+  const dispatch = useDispatch<AppDispatch>();
 
-const foodState = useSelector((state: any) => state.food) ?? {
-  items: [],
-  loading: false,
-  page: 0,
-  totalPages: 1,
-};
+  const { items, loading, page, totalPages} = useSelector(
+    (state: any) => state.food
+  );
 
-const {items, loading, page, totalPages} = foodState;
+  // Initial load + search change
+  useEffect(() => {
+    dispatch(fetchFoodItems({ page: 0, size: 10, search }));
+  }, [dispatch, search]);
 
-console.log("Food Items:", items);
-
-useEffect(()=>{
-    dispatch(fetchFoodItems({page: 0, size: 10}));
-},[dispatch])
-
-const loadMore = () => {
-    if(!loading && page < totalPages){
-        dispatch(fetchFoodItems({page, size: 10}));
+  const loadMore = () => {
+    if (!loading && page + 1 < totalPages) {
+      dispatch(fetchFoodItems({ page: page + 1, size: 10, search }));
     }
-}
+  };
 
-const onRefresh = () => {
-  dispatch(resetFoodItems());
-  dispatch(fetchFoodItems({ page: 0, size: 10 }));
-};
+  const onRefresh = () => {
+    dispatch(resetFoodItems());
+    dispatch(fetchFoodItems({ page: 0, size: 10, search }));
+  };
 
-    // 2. Wrap all calculations in useMemo to recalculate ONLY when screenWidth changes
-    const { DYNAMIC_COLUMN_COUNT, cardWrapperStyle } = useMemo(() => {
-        
-        // --- CALCULATION LOGIC (Moved inside useMemo) ---
-        
-        // Calculate the effective width available for cards
-        const effectiveWidth = screenWidth - (PADDING * 2);
-
-        // Determine the maximum number of columns that can fit
-        const numColumns = Math.max(1, Math.floor(
-            effectiveWidth / (MINIMUM_CARD_WIDTH + GUTTER_SIZE)
-        ));
-
-        // Calculate the actual width each card will take up
-        const totalGutterWidth = GUTTER_SIZE * (numColumns - 1);
-        const cardWidth = (effectiveWidth - totalGutterWidth) / numColumns;
-
-        // Define the item wrapper styles based on the new calculations
-        const wrapperStyle = {
-            width: cardWidth,
-            marginHorizontal: GUTTER_SIZE / 2, 
-            marginBottom: GUTTER_SIZE,
-        };
-
-        return { 
-            DYNAMIC_COLUMN_COUNT: numColumns, 
-            CARD_WIDTH: cardWidth, // Retained for clarity, though not strictly needed here
-            cardWrapperStyle: wrapperStyle 
-        };
-    }, [screenWidth]); // <-- Dependency array ensures this runs on resize
-
-    // TanStack Query logic (remains the same)
-    // const {
-    //     data,
-    //     fetchNextPage,
-    //     hasNextPage,
-    //     isFetchingNextPage,
-    //     refetch,
-    //     isRefetching,
-    // } = useInfiniteQuery({
-    //     queryKey: ['images'],
-    //     initialPageParam: 1, 
-    //     queryFn: fetchImages,
-    //     getNextPageParam: (lastPage) => lastPage.nextPage,
-    // });
-
-    // const images = useMemo(
-    //     () => data?.pages.flatMap((page) => page.images) || [],
-    //     [data]
-    // );
-
-    return (
-        <View style={styles.container}>
-            <FlashList
-                data={items}
-                keyExtractor={(item: FoodItem) => item.id.toString()}
-                showsVerticalScrollIndicator={false}
-                
-                // Set the calculated number of columns
-                numColumns={DYNAMIC_COLUMN_COUNT} 
-                contentContainerStyle={styles.listContent}
-
-                ListHeaderComponent={ListHeaderComponent} 
-
-                refreshControl={
-                    <RefreshControl
-                        tintColor={'green'}
-                        refreshing={loading}
-                        onRefresh={onRefresh}
-                    />
-                }
-                renderItem={({ item }) => (
-                    // 3. Apply the calculated style directly
-                    <View style={cardWrapperStyle}>
-                        <FoodCard 
-                            id={parseInt(item.id.toString())} 
-                            name={item.name} 
-                            imageUrl={item.imageUrl} 
-                            description={item.description} 
-                            price={item.price} 
-                        />
-                    </View>
-                )}
-                onEndReachedThreshold={0.2}
-                onEndReached={loadMore} 
-                ListFooterComponent={
-                    loading ? (
-                        <ActivityIndicator
-                            color="green"
-                            size="large"
-                            style={styles.footer}
-                        />
-                    ) : null
-                }
-            />
-        </View>
+  const { DYNAMIC_COLUMN_COUNT, cardWrapperStyle } = useMemo(() => {
+    const effectiveWidth = screenWidth - PADDING * 2;
+    const numColumns = Math.max(
+      1,
+      Math.floor(effectiveWidth / (MINIMUM_CARD_WIDTH + GUTTER_SIZE))
     );
+
+    const totalGutterWidth = GUTTER_SIZE * (numColumns - 1);
+    const cardWidth = (effectiveWidth - totalGutterWidth) / numColumns;
+
+    return {
+      DYNAMIC_COLUMN_COUNT: numColumns,
+      cardWrapperStyle: {
+        width: cardWidth,
+        marginHorizontal: GUTTER_SIZE / 2,
+        marginBottom: GUTTER_SIZE,
+      },
+    };
+  }, [screenWidth]);
+
+  return (
+    <View style={styles.container}>
+      <FlashList
+        data={items}
+        keyExtractor={(item: FoodItem) => item.id.toString()}
+        numColumns={DYNAMIC_COLUMN_COUNT}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={ListHeaderComponent}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <View style={cardWrapperStyle}>
+            <FoodCard {...item} />
+          </View>
+        )}
+        onEndReachedThreshold={0.3}
+        onEndReached={loadMore}
+        ListFooterComponent={
+          loading && page + 1 < totalPages ? (
+            <ActivityIndicator size="large" color="green" />
+          ) : null
+        }
+      />
+    </View>
+  );
 }
+
 
 // Stylesheet only contains static styles now
 const styles = StyleSheet.create({
