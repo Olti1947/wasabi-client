@@ -2,7 +2,7 @@ import HorizontalFoodList from "@/src/components/HorizontalFoodList";
 import MenuScroll from "@/src/components/MenuScroll";
 import { selectUser } from "@/src/features/auth/authSelectors";
 import { colors } from "@/src/theme/colors";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -18,11 +18,6 @@ import { useSelector } from "react-redux";
  * - Uses MenuScroll (FlashList) as the primary scroll container.
  * - This allows the infinite scroll (pagination) of MenuScroll to function correctly.
  */
-
-export default function Index() {
-  const [search, setSearch] = useState("");
-  const user = useSelector(selectUser);
-
   // example data for horizontal list: replace with real data or props
   const popularData = [
     {
@@ -51,8 +46,19 @@ export default function Index() {
     },
   ];
 
-  // The static content (Header and Popular Dishes) is combined here
-  // to be used as the ListHeaderComponent for the FlashList in MenuScroll.
+export default function Index() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const user = useSelector(selectUser);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const ListHeader = (
     <>
       {/* Header */}
@@ -72,15 +78,21 @@ export default function Index() {
         />
       </View>
 
-      {/* Popular Dishes Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Popular Dishes</Text>
-        <HorizontalFoodList data={popularData} title="" />
-      </View>
+      {/* Show Popular ONLY when not searching */}
+      {debouncedSearch.length === 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Popular Dishes</Text>
+          <HorizontalFoodList data={popularData} title="" />
+        </View>
+      )}
 
-      {/* Full Menu Title (placed here as part of the header) */}
-      <View style={[styles.section, { marginBottom: 0, paddingBottom: 0 }]}>
-        <Text style={styles.sectionTitle}>Full Menu</Text>
+      {/* Title changes based on mode */}
+      <View style={[styles.section, { marginBottom: 0 }]}>
+        <Text style={styles.sectionTitle}>
+          {debouncedSearch.length > 0
+            ? `Results for “${debouncedSearch}”`
+            : "Full Menu"}
+        </Text>
       </View>
     </>
   );
@@ -88,12 +100,14 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" />
-
-      {/* MenuScroll (FlashList) is now the main component handling the scroll */}
-      <MenuScroll ListHeaderComponent={ListHeader} />
+      <MenuScroll
+        ListHeaderComponent={ListHeader}
+        search={debouncedSearch}   
+      />
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safe: {
