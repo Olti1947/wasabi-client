@@ -3,9 +3,8 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { setApiAuth } from '../api/apiClient';
 import { selectIsAuthenticated } from '../features/auth/authSelectors';
-import { refreshToken } from '../features/auth/authSlice';
+import { logout, refreshToken } from '../features/auth/authSlice';
 import { store } from '../store';
-import { LoginScreen } from './screens/LoginScreen';
 
 export default function Index(){
     setApiAuth(
@@ -16,6 +15,9 @@ export default function Index(){
 
     const newTokens = await store.dispatch(refreshToken(refresh)).unwrap();
     return newTokens.authenticationToken;
+  },
+  () => {
+    store.dispatch(logout());
   }
 );
    const isAuthenticated = useSelector(selectIsAuthenticated)

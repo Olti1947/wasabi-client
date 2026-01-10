@@ -1,5 +1,9 @@
-import { FoodItem } from "../food/foodTypes";
 
-export interface CartItem extends FoodItem {
+export interface CartItem {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    imageUrl: string;
     quantity: number;
 }
