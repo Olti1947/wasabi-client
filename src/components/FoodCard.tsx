@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch } from 'react-redux';
@@ -28,12 +29,15 @@ const FoodCard = ({ id, name, imageUrl, description, price }: FoodCardProps) => 
   };
 
   return (
+    
     <View style={styles.container}>
+      <TouchableOpacity onPress={()=> router.push(`/food/${id}`)}>
       {imageUrl ? (
         <Image style={styles.imageStyle} source={{ uri: imageUrl }} />
       ) : (
         <View style={styles.placeholder} />
       )}
+      </TouchableOpacity>
       <View style={styles.infoContainer}>
         <Text style={styles.foodTitle}>{name}</Text>
         <Text style={styles.foodDescription}>{description}</Text>

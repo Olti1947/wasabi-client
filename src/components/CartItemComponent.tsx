@@ -3,11 +3,18 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useDispatch, useSelector } from "react-redux";
 import { selectCartItemCountById } from "../features/cart/cartSelectors";
 import { removeFromCart, updateCartItemQuantity } from "../features/cart/cartSlice";
-import { FoodItem } from "../features/food/foodTypes";
 import { AppDispatch, RootState } from "../store";
 import { colors } from "../theme/colors";
 
-const CartItemComponent = ({ id, name, description, price, imageUrl }: FoodItem) => {
+type CartItemProps = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+};
+
+const CartItemComponent = ({ id, name, description, price, imageUrl }: CartItemProps) => {
   const dispatch = useDispatch<AppDispatch>();
 
   // Get quantity from Redux store

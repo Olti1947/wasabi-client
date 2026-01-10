@@ -1,16 +1,19 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
-import { logout } from '../features/auth/authSlice';
 
 type TokenProvider = () => string | null;
 type RefreshHandler = () => Promise<string>;
+type LogoutHandler = () => void;
 
 let getToken: TokenProvider;
 let onRefresh: RefreshHandler;
+let onLogout: LogoutHandler;
 
-export const setApiAuth = (tokenProvider: TokenProvider, refreshHandler: RefreshHandler) => {
+export const setApiAuth = (tokenProvider: TokenProvider, refreshHandler: RefreshHandler, logoutHandler: LogoutHandler) => {
   getToken = tokenProvider;
   onRefresh = refreshHandler;
+  onLogout = logoutHandler;
+
 };
 
 const api = axios.create({
@@ -66,7 +69,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        logout(); // optional: dispatch logout outside if you want
+        onLogout?.(); // optional: dispatch logout outside if you want
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
