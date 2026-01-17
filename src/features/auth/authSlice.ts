@@ -31,7 +31,7 @@ const authSlice = createSlice({
   initialState: {
     user: null as User | null,
     token: null as string | null,
-    loading: false,
+    loading: true,
     error: null as string | null,
     refreshToken: null as string | null,
   },
@@ -39,16 +39,6 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
-    },
-    rehydrateAuth: (state) => {
-      const token = localStorage.getItem('token');
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (token) state.token = token;
-      if (refreshToken) state.refreshToken = refreshToken;
-    },
-    setToken: (state, action) => {
-      state.token = action.payload;
-      localStorage.setItem('token', action.payload);
     }
   },
   extraReducers: (builder) => {
@@ -82,17 +72,14 @@ const authSlice = createSlice({
         state.loading = false;
         state.token = action.payload.authenticationToken;
         state.user = action.payload.user;
-        localStorage.setItem('refreshToken', action.payload.refreshToken); 
-        localStorage.setItem('token', action.payload.authenticationToken);
       })
 
       .addCase(refreshToken.fulfilled, (state, action) => {
       state.token = action.payload.authenticationToken;
       state.refreshToken = action.payload.refreshToken;
-      localStorage.setItem('token', action.payload.authenticationToken);
-      localStorage.setItem('refreshToken', action.payload.refreshToken);
-      });
+      })
+      
   },
 });
-export const { logout, setToken } = authSlice.actions;
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

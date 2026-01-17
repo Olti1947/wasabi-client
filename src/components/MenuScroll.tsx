@@ -2,13 +2,14 @@ import { FlashList } from '@shopify/flash-list';
 // import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import {
-    ActivityIndicator,
-    StyleSheet,
-    useWindowDimensions // <-- IMPORT THE HOOK
-    ,
+  ActivityIndicator,
+  StyleSheet,
+  useWindowDimensions // <-- IMPORT THE HOOK
+  ,
 
 
-    View
+
+  View
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFoodItems, resetFoodItems } from '../features/food/foodSlice';
@@ -36,22 +37,6 @@ interface MenuScrollProps {
     ListHeaderComponent: React.ReactElement | null;
     search: string;
 }
-
-// const fetchImages = async ({ pageParam = 1 }): Promise<Page> => {
-//     try{
-//         const response = await axios.get('/api/foods', {
-
-//         })
-//     }
-
-//     // const images = Array.from({ length: 10 }, (_, index) => ({
-//     //     id: `img-${pageParam}-${index}-${Date.now()}`, 
-//     //     url: `https://picsum.photos/300/200?random=${pageParam * 10 + index}`, 
-//     // }));
-    
-//     const nextPage = pageParam < 5 ? pageParam + 1 : 0; 
-//     return { images, nextPage: nextPage };
-// };
 
 export default function MenuScroll({ ListHeaderComponent, search }: MenuScrollProps) {
   const { width: screenWidth } = useWindowDimensions();

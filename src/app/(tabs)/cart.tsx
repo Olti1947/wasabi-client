@@ -1,34 +1,85 @@
 import CartItemComponent from "@/src/components/CartItemComponent";
 import { selectCartItems, selectCartTotalPrice } from "@/src/features/cart/cartSelectors";
-import { AppDispatch } from "@/src/store";
+import { CartItemRequest } from "@/src/features/cart/cartTypes";
+import { getAvailableCoupons, previewCheckout, selectCoupon } from "@/src/features/checkout/checkoutSlice";
+import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
-import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Cart() {
   const dispatch = useDispatch<AppDispatch>();
   const cartItems = useSelector(selectCartItems);
+  const {user, loading: authLoading} = useSelector((state:RootState) => state.auth);
+
+  useEffect(()=>{
+   if(authLoading) return;
+   if(!user) return;
+
+   if (cartItems.length === 0) return;
+
+    const payload: CartItemRequest[] = cartItems.map(item => ({
+      foodItemId: item.id,
+      quantity: item.quantity
+    }));
+
+    dispatch(getAvailableCoupons(payload));
+  },[cartItems,dispatch])
 
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
 const phonePattern = /^\d{3} \d{3} \d{3}$/
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+
+  const setSelectedCoupon = (couponId: number | null) => {
+    dispatch(selectCoupon(couponId));
+  }
+
+
+const {preview, availableCoupons, selectedCouponId, loading, error} = useSelector((state:RootState) => 
+  state.checkout
+)
+
+const couponItems = availableCoupons.map(coupon => (
+{
+  label: `${coupon.title} - ${coupon.value}`,
+  value: coupon.id
+}
+))
+
+useEffect(() => {
+  setSelectedCoupon(value);
+  if (selectedCouponId && cartItems.length > 0) {
+    const payload = {
+        items: cartItems.map(item => ({
+      foodItemId: item.id,
+      quantity: item.quantity
+    })),
+    discountId: selectedCouponId
+  };
+  dispatch(previewCheckout(payload));
+      }
+    }, [selectedCouponId, value,cartItems, dispatch]);
+
 
   const totalPrice = useSelector(selectCartTotalPrice);
 
   const handlePlaceOrder = () => {
     
     if (!phone || !address) {
-      setError("Please enter phone number and delivery address.");
+      setFormError("Please enter phone number and delivery address.");
       return;
     }
 
       if (!phonePattern.test(phone)) {
-    setError("Phone number must be in the format XXX XXX XXX (e.g., 045 123 456).");
+    setFormError("Phone number must be in the format XXX XXX XXX (e.g., 045 123 456).");
     return;
   }
-    setError("");
+    setFormError("");
     alert(`Order placed!\nTotal: $${totalPrice}\nPhone: ${phone}\nAddress: ${address}`);
   };
 
@@ -53,6 +104,10 @@ const phonePattern = /^\d{3} \d{3} \d{3}$/
   }
 
   return (
+    <View style ={{
+      flex: 1,
+      paddingTop: Platform.OS === "ios" ? 50 : 20
+    }}>
     <ScrollView contentContainerStyle={styles.container}>
       {cartItems.map((item) => (
         <CartItemComponent
@@ -85,14 +140,34 @@ const phonePattern = /^\d{3} \d{3} \d{3}$/
           onChangeText={setAddress}
         />
 
-        <Text style={styles.totalPrice}>Total: ${totalPrice.toFixed(2)}</Text>
+            <DropDownPicker
+        open={open}
+        value={value}
+        items={couponItems}
+        setOpen={setOpen}
+        setValue={setValue}
+        placeholder="Select a coupon"
+        disabled = {couponItems.length === 0}
+        listMode="SCROLLVIEW"
+        style={styles.dropdown}
+      />
+        {
+          preview && (
+            <View style={styles.previewContainer}>
+              <Text style={styles.previewText}>Subtotal: €{preview.subtotal.toFixed(2)}</Text>
+              <Text style={styles.discountText}>Discount: €{preview.discount.toFixed(2)}</Text>
+              <Text style={styles.totalPrice}>Total: €{preview.total.toFixed(2)}</Text>
+            </View>
+          )
+        }
 
-        {error ? <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text> : null}
+        {error ? <Text style={{ color: 'red', marginBottom: 10 }}>{formError}</Text> : null}
         <TouchableOpacity style={styles.orderButton} onPress={handlePlaceOrder}>
           <Text style={styles.orderButtonText}>Place Order</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -145,5 +220,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+    dropdown: {
+    borderColor: '#ccc',
+  },
+  previewContainer: {
+    marginTop: 10,
+  },
+  previewText: {
+    fontSize: 16,
+  },
+  discountText: {
+    fontSize: 16,
+    color: colors.accent,
   },
 });

@@ -1,4 +1,5 @@
 import { selectIsAuthenticated } from "@/src/features/auth/authSelectors";
+import { RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from "expo-router";
@@ -6,8 +7,9 @@ import { useSelector } from "react-redux";
 
 export default function TabsLayout(){
 const isAuthenticated = useSelector(selectIsAuthenticated)
+  const { user, loading } = useSelector((state: RootState) => state.auth);
  
-if (!isAuthenticated){
+if (!user){
     return <Redirect href = {"/(auth)/login" as any} />
 }
 
@@ -43,5 +45,16 @@ if (!isAuthenticated){
             <Ionicons name="cart-outline" size={size} color={color} />
           ),
         }} />
+
+        <Tabs.Screen
+        name = "discounts"
+        options={{
+          title: "Discounts",
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="ticket-outline" size = {size} color={color} />
+          )
+        }}
+        
+        />
     </Tabs>;
 }
