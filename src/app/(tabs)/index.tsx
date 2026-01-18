@@ -1,6 +1,9 @@
+import HorizontalDiscountList from "@/src/components/HorizontalDiscountList";
 import HorizontalFoodList from "@/src/components/HorizontalFoodList";
 import MenuScroll from "@/src/components/MenuScroll";
 import { selectUser } from "@/src/features/auth/authSelectors";
+import { fetchActiveDiscounts } from "@/src/features/discount/discountSlice";
+import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,7 +14,7 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 /**
  * Home / Index screen
@@ -50,6 +53,12 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const user = useSelector(selectUser);
+  const dispatch = useDispatch<AppDispatch>();
+  const activeDiscounts = useSelector((state: RootState) => state.discounts.active)
+
+  useEffect(()=>{
+    dispatch(fetchActiveDiscounts())
+  },[dispatch])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -85,6 +94,15 @@ export default function Index() {
           <HorizontalFoodList data={popularData} title="" />
         </View>
       )}
+
+      {
+        debouncedSearch.length === 0 && (
+          <View style={styles.section}>
+          <Text style= {styles.sectionTitle}>Your Active Discounts</Text>
+          <HorizontalDiscountList data={activeDiscounts} title=""/>
+          </View>
+        )
+      }
 
       {/* Title changes based on mode */}
       <View style={[styles.section, { marginBottom: 0 }]}>

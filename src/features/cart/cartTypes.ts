@@ -7,3 +7,8 @@ export interface CartItem {
     imageUrl: string;
     quantity: number;
 }
+
+export interface CartItemRequest {
+    foodItemId: number;
+    quantity: number;
+}

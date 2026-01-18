@@ -25,7 +25,7 @@ export const fetchFoodItems = createAsyncThunk(
     }
 );
 
-const  foodSlice = createSlice({
+const foodSlice = createSlice({
     name: 'food',
     initialState: {
         items: [] as FoodItem[],

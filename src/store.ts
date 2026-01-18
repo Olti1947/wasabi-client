@@ -4,7 +4,10 @@ import { combineReducers } from 'redux';
 import { Persistor, persistReducer, persistStore } from 'redux-persist';
 import authReducer from './features/auth/authSlice';
 import cartReducer from './features/cart/cartSlice';
+import checkoutReducer from './features/checkout/checkoutSlice';
+import discountReducer from './features/discount/discountSlice';
 import foodReducer from './features/food/foodSlice';
+
 
   // Persist config
   const persistConfig = {
@@ -18,6 +21,8 @@ import foodReducer from './features/food/foodSlice';
     auth: authReducer,
     food: foodReducer,
     cart: cartReducer,
+    discounts: discountReducer,
+    checkout: checkoutReducer,
   });
 
   // Persisted reducer
