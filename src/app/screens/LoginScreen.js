@@ -25,7 +25,6 @@ import { loginUser } from '../../features/auth/authSlice';
 
 export const LoginScreen = () => {
   const [appIsReady, setAppIsReady] = useState(false);
-  console.log('Rendering LoginScreen');
   const [fontsLoaded] = useFonts({
     'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
     'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),

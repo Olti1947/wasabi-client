@@ -31,12 +31,10 @@ export default function Cart() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [formError, setFormError] = useState("");
-const phonePattern = /^\d{3} \d{3} \d{3}$/
+  const phonePattern = /^\d{3} \d{3} \d{3}$/
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [uiTotal, setUiTotal] = useState(0);
-
-
 
   const setSelectedCoupon = (couponId: number | null) => {
     dispatch(selectCoupon(couponId));

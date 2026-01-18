@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux';
 export default function QrRoute() {
 
 const qrCodeToken = useSelector(selectQrCodeToken);
-console.log("QR Code Token:", qrCodeToken);
 
 if(!qrCodeToken){
     return (
