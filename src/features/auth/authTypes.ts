@@ -9,6 +9,7 @@ export interface User {
     lastName: string;
     email: string;
     role: Role;
+    qrCodeToken: string;
 }
 
 export interface AuthResponse {

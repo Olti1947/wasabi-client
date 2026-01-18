@@ -54,7 +54,16 @@ if (!user){
             <Ionicons name="ticket-outline" size = {size} color={color} />
           )
         }}
-        
+        />
+
+        <Tabs.Screen
+        name = "qr"
+        options ={{
+          title: "QR Code",
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="qr-code-outline" size = {size} color={color} />
+          )
+        }}
         />
     </Tabs>;
 }
