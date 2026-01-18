@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { setApiAuth } from '../api/apiClient';
-import AuthGate from '../components/AuthGate';
 import { logout, refreshToken } from '../features/auth/authSlice';
 import { getPersistor, store } from '../store';
 
@@ -40,11 +39,9 @@ export default function RootLayout() {
         }}
       >
         <QueryClientProvider client={queryClient}>
-        <AuthGate>
           <Stack
             screenOptions={{headerShown: false}}
           />
-          </AuthGate>
         </QueryClientProvider>
       </PersistGate>
     </Provider>

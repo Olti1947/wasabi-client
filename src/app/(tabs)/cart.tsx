@@ -31,9 +31,10 @@ export default function Cart() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [formError, setFormError] = useState("");
-const phonePattern = /^\d{3} \d{3} \d{3}$/
+  const phonePattern = /^\d{3} \d{3} \d{3}$/
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
+  const [uiTotal, setUiTotal] = useState(0);
 
   const setSelectedCoupon = (couponId: number | null) => {
     dispatch(selectCoupon(couponId));
@@ -65,6 +66,12 @@ useEffect(() => {
       }
     }, [selectedCouponId, value,cartItems, dispatch]);
 
+useEffect(()=>{
+  if(cartItems.length > 0 && !preview){
+      setUiTotal(cartItems.reduce((total, item) => total + item.price * item.quantity, 0));
+    }
+},[cartItems, preview])
+  
 
   const totalPrice = useSelector(selectCartTotalPrice);
 
@@ -139,8 +146,9 @@ useEffect(() => {
           value={address}
           onChangeText={setAddress}
         />
-
-            <DropDownPicker
+  {
+    availableCoupons.length > 0 ? (
+                  <DropDownPicker
         open={open}
         value={value}
         items={couponItems}
@@ -151,14 +159,21 @@ useEffect(() => {
         listMode="SCROLLVIEW"
         style={styles.dropdown}
       />
+    ) : <Text>No coupons available</Text>
+  }
+
         {
-          preview && (
+          preview ? (
             <View style={styles.previewContainer}>
               <Text style={styles.previewText}>Subtotal: €{preview.subtotal.toFixed(2)}</Text>
               <Text style={styles.discountText}>Discount: €{preview.discount.toFixed(2)}</Text>
               <Text style={styles.totalPrice}>Total: €{preview.total.toFixed(2)}</Text>
             </View>
-          )
+          ) : (            <View style={styles.previewContainer}>
+              <Text style={styles.previewText}>Subtotal: €{uiTotal.toFixed(2)}</Text>
+              <Text style={styles.discountText}>Discount: €{0}</Text>
+              <Text style={styles.totalPrice}>Total: €{uiTotal.toFixed(2)}</Text>
+            </View>)
         }
 
         {error ? <Text style={{ color: 'red', marginBottom: 10 }}>{formError}</Text> : null}

@@ -34,6 +34,7 @@ const authSlice = createSlice({
     loading: true,
     error: null as string | null,
     refreshToken: null as string | null,
+    qrCodeToken: null as string | null,
   },
   reducers: {
     logout: (state) => {
