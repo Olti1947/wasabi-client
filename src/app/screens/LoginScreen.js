@@ -1,9 +1,12 @@
-import { selectError, selectIsAuthenticated } from '@/src/features/auth/authSelectors';
-import { colors } from '@/src/theme/colors';
-import { useFonts } from 'expo-font';
-import { router } from 'expo-router';
-import { Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import {
+  selectError,
+  selectIsAuthenticated,
+} from "@/src/features/auth/authSelectors";
+import { colors } from "@/src/theme/colors";
+import { useFonts } from "expo-font";
+import { router } from "expo-router";
+import { Formik } from "formik";
+import { useEffect, useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -14,11 +17,14 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useDispatch, useSelector } from 'react-redux';
-import * as yup from 'yup';
-import { loginUser } from '../../features/auth/authSlice';
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
+import * as yup from "yup";
+import { loginUser } from "../../features/auth/authSlice";
 
 // Prevent splash screen from auto-hiding on app load
 // SplashScreen.preventAutoHideAsync();
@@ -26,8 +32,8 @@ import { loginUser } from '../../features/auth/authSlice';
 export const LoginScreen = () => {
   const [appIsReady, setAppIsReady] = useState(false);
   const [fontsLoaded] = useFonts({
-    'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
-    'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
+    "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
+    "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
 
   const insets = useSafeAreaInsets();
@@ -39,25 +45,28 @@ export const LoginScreen = () => {
   const loginValidationSchema = yup.object().shape({
     email: yup
       .string()
-      .email('Please enter a valid email')
-      .required('Email Address is Required'),
+      .email("Please enter a valid email")
+      .required("Email Address is Required"),
     password: yup
       .string()
       .min(6, ({ min }) => `Password must be at least ${min} characters`)
-      .required('Password is required'),
+      .required("Password is required"),
   });
 
   const handleLogin = async (values, { setSubmitting }) => {
     try {
       const resultAction = await dispatch(loginUser(values));
       if (loginUser.fulfilled.match(resultAction)) {
-        console.log('✅ Login successful:', resultAction.payload);
-        router.replace('/(tabs)');
+        console.log("✅ Login successful:", resultAction.payload);
+        router.replace("/(tabs)");
       } else {
-        console.log('❌ Login failed:', resultAction.payload || 'Unknown error');
+        console.log(
+          "❌ Login failed:",
+          resultAction.payload || "Unknown error",
+        );
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
     } finally {
       setSubmitting(false);
     }
@@ -81,10 +90,8 @@ export const LoginScreen = () => {
 
   if (isLoggedIn) {
     return (
-      <SafeAreaView
-        style={[styles.container, { paddingTop: insets.top }]}
-      >
-        <Text style={{ color: '#fff', fontSize: 18, marginTop: 100 }}>
+      <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+        <Text style={{ color: "#fff", fontSize: 18, marginTop: 100 }}>
           You are already logged in
         </Text>
       </SafeAreaView>
@@ -92,13 +99,11 @@ export const LoginScreen = () => {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { paddingTop: insets.top }]}
-    >
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
       {/* Background Image */}
       <Image
         style={styles.image}
-        source={require('../../assets/loginBackground.png')}
+        source={require("../../assets/loginBackground.png")}
         resizeMode="cover"
       />
 
@@ -112,14 +117,11 @@ export const LoginScreen = () => {
 
       {/* Bottom Sheet */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardAvoiding}
       >
         <View
-          style={[
-            styles.bottomSheet,
-            { paddingBottom: insets.bottom + 20 },
-          ]}
+          style={[styles.bottomSheet, { paddingBottom: insets.bottom + 20 }]}
         >
           <ScrollView
             contentContainerStyle={{ paddingBottom: 40 }}
@@ -127,7 +129,7 @@ export const LoginScreen = () => {
           >
             <Formik
               validationSchema={loginValidationSchema}
-              initialValues={{ email: '', password: '' }}
+              initialValues={{ email: "", password: "" }}
               onSubmit={handleLogin}
             >
               {({
@@ -148,8 +150,8 @@ export const LoginScreen = () => {
                       placeholder="Email"
                       keyboardType="email-address"
                       autoCapitalize="none"
-                      onChangeText={handleChange('email')}
-                      onBlur={handleBlur('email')}
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
                       value={values.email}
                     />
                   </View>
@@ -163,8 +165,8 @@ export const LoginScreen = () => {
                       style={styles.input}
                       placeholder="Password"
                       secureTextEntry
-                      onChangeText={handleChange('password')}
-                      onBlur={handleBlur('password')}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
                       value={values.password}
                     />
                   </View>
@@ -172,12 +174,12 @@ export const LoginScreen = () => {
                     <Text style={styles.errorText}>{errors.password}</Text>
                   )}
 
-                  <TouchableOpacity
-                    onPress={() => router.navigate('Forget')}
-                  >
+                  <TouchableOpacity onPress={() => router.navigate("Forget")}>
                     <Text style={styles.forgotPassword}>Forgot Password?</Text>
                   </TouchableOpacity>
-                   {error && <Text style={styles.errorText}>{error.message}</Text>}
+                  {error && (
+                    <Text style={styles.errorText}>{error.message}</Text>
+                  )}
                   <TouchableOpacity
                     style={[
                       styles.button,
@@ -187,15 +189,15 @@ export const LoginScreen = () => {
                     disabled={!isValid || isSubmitting}
                   >
                     <Text style={styles.buttonText}>
-                      {isSubmitting ? 'Logging in...' : 'Login'}
+                      {isSubmitting ? "Logging in..." : "Login"}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => router.push('/(auth)/register')}
+                    onPress={() => router.push("/(auth)/register")}
                   >
                     <Text style={styles.signUp}>
-                      Don’t have an account?{' '}
+                      Don’t have an account?{" "}
                       <Text style={styles.signUpLink}>Sign Up</Text>
                     </Text>
                   </TouchableOpacity>
@@ -215,102 +217,102 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   image: {
     ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   headerArea: {
-    position: 'absolute',
-    top: '15%',
+    position: "absolute",
+    top: "15%",
     zIndex: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.white,
-    fontFamily: 'Poppins-Bold',
+    fontFamily: "Poppins-Bold",
   },
   paragraph: {
     fontSize: 16,
     color: colors.white,
     marginTop: 8,
-    textAlign: 'center',
-    fontFamily: 'Poppins-Regular',
+    textAlign: "center",
+    fontFamily: "Poppins-Regular",
   },
   keyboardAvoiding: {
     flex: 1,
-    width: '100%',
-    justifyContent: 'flex-end',
+    width: "100%",
+    justifyContent: "flex-end",
   },
   bottomSheet: {
     backgroundColor: colors.white,
-    width: '100%',
+    width: "100%",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
     paddingTop: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 10,
   },
   fieldPlaceHolder: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
     height: 50,
-    backgroundColor: '#e4e4e4ff',
+    backgroundColor: "#e4e4e4ff",
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 20,
   },
   input: {
     flex: 1,
-    height: '100%',
-    fontFamily: 'Poppins-Regular',
+    height: "100%",
+    fontFamily: "Poppins-Regular",
   },
   forgotPassword: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 20,
     color: colors.primary,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
   },
   button: {
-    width: '100%',
+    width: "100%",
     height: 50,
-    backgroundColor: '#1E90FF',
+    backgroundColor: "#1E90FF",
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 20,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontFamily: 'Poppins-Bold',
+    fontFamily: "Poppins-Bold",
   },
   signUp: {
-    color: '#000',
-    textAlign: 'center',
-    fontFamily: 'Poppins-Regular',
+    color: "#000",
+    textAlign: "center",
+    fontFamily: "Poppins-Regular",
   },
   signUpLink: {
     color: colors.primary,
-    fontWeight: 'bold',
-    fontFamily: 'Poppins-Bold',
+    fontWeight: "bold",
+    fontFamily: "Poppins-Bold",
   },
   errorText: {
-    color: 'red',
-    alignSelf: 'flex-start',
+    color: "red",
+    alignSelf: "flex-start",
     marginBottom: 10,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
   },
 });

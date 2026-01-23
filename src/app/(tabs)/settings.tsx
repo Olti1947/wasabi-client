@@ -1,7 +1,11 @@
+import { logout } from "@/src/features/auth/authSlice";
+import { AppDispatch } from "@/src/store";
 import { StyleSheet, Text, View } from "react-native";
+import { useDispatch } from "react-redux";
 import SettingsButton from "../../components/SettingsButton";
 
 export default function Settings() {
+    const dispatch = useDispatch<AppDispatch>();
     return (
         <View style={styles.container}>
             <View>
@@ -20,7 +24,7 @@ export default function Settings() {
                  <SettingsButton title="Payment Methods" icon="card" onPress={()=>{}}></SettingsButton>
                     </View>
                 <View style={styles.buttonGroupContainer}>
-                <SettingsButton title="Log out" icon="log-out" onPress={()=>{}}></SettingsButton>
+                <SettingsButton title="Log out" icon="log-out" onPress={()=>{dispatch(logout())}}></SettingsButton>
                 </View>
      
         </View>
