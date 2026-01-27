@@ -1,108 +1,166 @@
 import CartItemComponent from "@/src/components/CartItemComponent";
-import { selectCartItems, selectCartTotalPrice } from "@/src/features/cart/cartSelectors";
+import OrderComponent from "@/src/components/OrderComponent";
+import {
+  selectCartItems,
+  selectCartTotalPrice,
+} from "@/src/features/cart/cartSelectors";
 import { CartItemRequest } from "@/src/features/cart/cartTypes";
-import { getAvailableCoupons, previewCheckout, selectCoupon } from "@/src/features/checkout/checkoutSlice";
+import {
+  getAvailableCoupons,
+  previewCheckout,
+  selectCoupon,
+} from "@/src/features/checkout/checkoutSlice";
+import { fetchOrders } from "@/src/features/order/orderSlice";
 import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import { useEffect, useState } from "react";
-import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Cart() {
   const dispatch = useDispatch<AppDispatch>();
   const cartItems = useSelector(selectCartItems);
-  const {user, loading: authLoading} = useSelector((state:RootState) => state.auth);
+  const orders = useSelector((state: RootState) => state.order);
+  const { user, loading: authLoading } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
-  useEffect(()=>{
-   if(authLoading) return;
-   if(!user) return;
+  const item = {
+    orderId: 1024,
+    status: "CREATED",
+    total: 27.1,
+    createdAt: "2026-01-26T18:45:00Z",
+    userEmail: "customer@sushiwasabi.com",
+    items: [
+      {
+        id: 1,
+        name: "Spicy Salmon Roll",
+        quantity: 2,
+        unitPrice: 6.5,
+      },
+      {
+        id: 2,
+        name: "Avocado Maki",
+        quantity: 1,
+        unitPrice: 4.2,
+      },
+      {
+        id: 3,
+        name: "Chicken Teriyaki Bowl",
+        quantity: 1,
+        unitPrice: 9.9,
+      },
+    ],
+  };
 
-   if (cartItems.length === 0) return;
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) return;
 
-    const payload: CartItemRequest[] = cartItems.map(item => ({
+    if (cartItems.length === 0) return;
+
+    const payload: CartItemRequest[] = cartItems.map((item) => ({
       foodItemId: item.id,
-      quantity: item.quantity
+      quantity: item.quantity,
     }));
 
     dispatch(getAvailableCoupons(payload));
-  },[cartItems,dispatch])
+  }, [cartItems, dispatch]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) return;
+    if (user.role === "USER") return;
+
+    dispatch(fetchOrders());
+  }, [dispatch]);
 
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [formError, setFormError] = useState("");
-  const phonePattern = /^\d{3} \d{3} \d{3}$/
+  const phonePattern = /^\d{3} \d{3} \d{3}$/;
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [uiTotal, setUiTotal] = useState(0);
 
   const setSelectedCoupon = (couponId: number | null) => {
     dispatch(selectCoupon(couponId));
-  }
-
-
-const {preview, availableCoupons, selectedCouponId, loading, error} = useSelector((state:RootState) => 
-  state.checkout
-)
-
-const couponItems = availableCoupons.map(coupon => (
-{
-  label: `${coupon.title} - ${coupon.value}`,
-  value: coupon.id
-}
-))
-
-useEffect(() => {
-  setSelectedCoupon(value);
-  if (selectedCouponId && cartItems.length > 0) {
-    const payload = {
-        items: cartItems.map(item => ({
-      foodItemId: item.id,
-      quantity: item.quantity
-    })),
-    discountId: selectedCouponId
   };
-  dispatch(previewCheckout(payload));
-      }
-    }, [selectedCouponId, value,cartItems, dispatch]);
 
-useEffect(()=>{
-  if(cartItems.length > 0 && !preview){
-      setUiTotal(cartItems.reduce((total, item) => total + item.price * item.quantity, 0));
+  const { preview, availableCoupons, selectedCouponId, loading, error } =
+    useSelector((state: RootState) => state.checkout);
+
+  const couponItems = availableCoupons.map((coupon) => ({
+    label: `${coupon.title} - ${coupon.value}`,
+    value: coupon.id,
+  }));
+
+  useEffect(() => {
+    setSelectedCoupon(value);
+    if (selectedCouponId && cartItems.length > 0) {
+      const payload = {
+        items: cartItems.map((item) => ({
+          foodItemId: item.id,
+          quantity: item.quantity,
+        })),
+        discountId: selectedCouponId,
+      };
+      dispatch(previewCheckout(payload));
     }
-},[cartItems, preview])
-  
+  }, [selectedCouponId, value, cartItems, dispatch]);
+
+  useEffect(() => {
+    if (cartItems.length > 0 && !preview) {
+      setUiTotal(
+        cartItems.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0,
+        ),
+      );
+    }
+  }, [cartItems, preview]);
 
   const totalPrice = useSelector(selectCartTotalPrice);
 
   const handlePlaceOrder = () => {
-    
     if (!phone || !address) {
       setFormError("Please enter phone number and delivery address.");
       return;
     }
 
-      if (!phonePattern.test(phone)) {
-    setFormError("Phone number must be in the format XXX XXX XXX (e.g., 045 123 456).");
-    return;
-  }
+    if (!phonePattern.test(phone)) {
+      setFormError(
+        "Phone number must be in the format XXX XXX XXX (e.g., 045 123 456).",
+      );
+      return;
+    }
     setFormError("");
-    alert(`Order placed!\nTotal: $${totalPrice}\nPhone: ${phone}\nAddress: ${address}`);
+    alert(
+      `Order placed!\nTotal: $${totalPrice}\nPhone: ${phone}\nAddress: ${address}`,
+    );
   };
 
   const formatKosovoPhone = (input: string) => {
-  // Remove any non-digit characters
-  const digits = input.replace(/\D/g, '');
-  // Insert spaces after 3 and 6 digits
-  const part1 = digits.substring(0, 3);
-  const part2 = digits.substring(3, 6);
-  const part3 = digits.substring(6, 9);
+    // Remove any non-digit characters
+    const digits = input.replace(/\D/g, "");
+    // Insert spaces after 3 and 6 digits
+    const part1 = digits.substring(0, 3);
+    const part2 = digits.substring(3, 6);
+    const part3 = digits.substring(6, 9);
 
-  return [part1, part2, part3].filter(Boolean).join(' ');
-};
+    return [part1, part2, part3].filter(Boolean).join(" ");
+  };
 
-
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && user?.role === "USER") {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>Your cart is empty.</Text>
@@ -110,86 +168,134 @@ useEffect(()=>{
     );
   }
 
-  return (
-    <View style ={{
-      flex: 1,
-      paddingTop: Platform.OS === "ios" ? 50 : 20
-    }}>
-    <ScrollView contentContainerStyle={styles.container}>
-      {cartItems.map((item) => (
-        <CartItemComponent
-          key={item.id}
-          id={item.id}
-          name={item.name}
-          description={item.description}
-          price={item.price}
-          imageUrl={item.imageUrl}
-        />
-      ))}
+  if (user?.role === "USER") {
+    return (
+      <View
+        style={{
+          flex: 1,
+          paddingTop: Platform.OS === "ios" ? 50 : 20,
+        }}
+      >
+        <ScrollView contentContainerStyle={styles.container}>
+          {cartItems.map((item) => (
+            <CartItemComponent
+              key={item.id}
+              id={item.id}
+              name={item.name}
+              description={item.description}
+              price={item.price}
+              imageUrl={item.imageUrl}
+            />
+          ))}
 
-      {/* Delivery Section */}
-      <View style={styles.deliveryContainer}>
-        <Text style={styles.sectionTitle}>Delivery Information</Text>
+          {/* Delivery Section */}
+          <View style={styles.deliveryContainer}>
+            <Text style={styles.sectionTitle}>Delivery Information</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Phone Number"
-          keyboardType="phone-pad"
-          value={phone}
-            onChangeText={(text) => setPhone(formatKosovoPhone(text))}
-        />
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={(text) => setPhone(formatKosovoPhone(text))}
+            />
 
-        <TextInput
-          style={[styles.input, { height: 80 }]}
-          placeholder="Delivery Address"
-          multiline
-          value={address}
-          onChangeText={setAddress}
-        />
-  {
-    availableCoupons.length > 0 ? (
-                  <DropDownPicker
-        open={open}
-        value={value}
-        items={couponItems}
-        setOpen={setOpen}
-        setValue={setValue}
-        placeholder="Select a coupon"
-        disabled = {couponItems.length === 0}
-        listMode="SCROLLVIEW"
-        style={styles.dropdown}
-      />
-    ) : <Text>No coupons available</Text>
-  }
+            <TextInput
+              style={[styles.input, { height: 80 }]}
+              placeholder="Delivery Address"
+              multiline
+              value={address}
+              onChangeText={setAddress}
+            />
+            {availableCoupons.length > 0 ? (
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={couponItems}
+                setOpen={setOpen}
+                setValue={setValue}
+                placeholder="Select a coupon"
+                disabled={couponItems.length === 0}
+                listMode="SCROLLVIEW"
+                style={styles.dropdown}
+              />
+            ) : (
+              <Text>No coupons available</Text>
+            )}
 
-        {
-          preview ? (
-            <View style={styles.previewContainer}>
-              <Text style={styles.previewText}>Subtotal: €{preview.subtotal.toFixed(2)}</Text>
-              <Text style={styles.discountText}>Discount: €{preview.discount.toFixed(2)}</Text>
-              <Text style={styles.totalPrice}>Total: €{preview.total.toFixed(2)}</Text>
-            </View>
-          ) : (            <View style={styles.previewContainer}>
-              <Text style={styles.previewText}>Subtotal: €{uiTotal.toFixed(2)}</Text>
-              <Text style={styles.discountText}>Discount: €{0}</Text>
-              <Text style={styles.totalPrice}>Total: €{uiTotal.toFixed(2)}</Text>
-            </View>)
-        }
+            {preview ? (
+              <View style={styles.previewContainer}>
+                <Text style={styles.previewText}>
+                  Subtotal: €{preview.subtotal.toFixed(2)}
+                </Text>
+                <Text style={styles.discountText}>
+                  Discount: €{preview.discount.toFixed(2)}
+                </Text>
+                <Text style={styles.totalPrice}>
+                  Total: €{preview.total.toFixed(2)}
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.previewContainer}>
+                <Text style={styles.previewText}>
+                  Subtotal: €{uiTotal.toFixed(2)}
+                </Text>
+                <Text style={styles.discountText}>Discount: €{0}</Text>
+                <Text style={styles.totalPrice}>
+                  Total: €{uiTotal.toFixed(2)}
+                </Text>
+              </View>
+            )}
 
-        {error ? <Text style={{ color: 'red', marginBottom: 10 }}>{formError}</Text> : null}
-        <TouchableOpacity style={styles.orderButton} onPress={handlePlaceOrder}>
-          <Text style={styles.orderButtonText}>Place Order</Text>
-        </TouchableOpacity>
+            {error ? (
+              <Text style={{ color: "red", marginBottom: 10 }}>
+                {formError}
+              </Text>
+            ) : null}
+            <TouchableOpacity
+              style={styles.orderButton}
+              onPress={handlePlaceOrder}
+            >
+              <Text style={styles.orderButtonText}>Place Order</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
-    </ScrollView>
-    </View>
-  );
+    );
+  } else if (user?.role === "ADMIN") {
+    return (
+      <View
+        style={{
+          flex: 1,
+          paddingTop: Platform.OS === "ios" ? 50 : 20,
+        }}
+      >
+        <ScrollView contentContainerStyle={styles.container}>
+          {orders.items.map((item, index) => {
+            return (
+              <OrderComponent
+                key={index}
+                orderId={item.orderId}
+                status={item.orderStatus}
+                total={item.total}
+                createdAt={item.createdAt}
+                userEmail={item.userEmail}
+                items={item.items}
+                phoneNumber={item.phoneNumber}
+                address={item.address}
+              />
+            );
+          })}
+        </ScrollView>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    paddingBottom: 40, 
+    paddingBottom: 40,
   },
   emptyContainer: {
     flex: 1,
@@ -236,8 +342,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-    dropdown: {
-    borderColor: '#ccc',
+  dropdown: {
+    borderColor: "#ccc",
   },
   previewContainer: {
     marginTop: 10,

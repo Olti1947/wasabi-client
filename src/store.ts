@@ -9,6 +9,7 @@ import chatReducer from "./features/chat/chatSlice";
 import checkoutReducer from "./features/checkout/checkoutSlice";
 import discountReducer from "./features/discount/discountSlice";
 import foodReducer from "./features/food/foodSlice";
+import orderReducer from "./features/order/orderSlice";
 // Persist config
 const persistConfig = {
   key: "root",
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
   checkout: checkoutReducer,
   chat: chatReducer,
   adminChat: adminChatReducer,
+  order: orderReducer,
 });
 
 // Persisted reducer

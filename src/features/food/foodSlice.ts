@@ -3,44 +3,44 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { FoodItem } from "./foodTypes";
 
 interface FetchFoodParams {
-    page?: number;
-    size?: number;
-    search?: string | null;
+  page?: number;
+  size?: number;
+  search?: string | null;
 }
 
 export const fetchFoodItems = createAsyncThunk(
-    'food/fetchFoodItems',
-    async ({page = 0, size = 10, search}: FetchFoodParams, {getState}) => {
-        const params = new URLSearchParams({
-            page: page.toString(),
-            size: size.toString(),
-        });
+  "food/fetchFoodItems",
+  async ({ page = 0, size = 10, search }: FetchFoodParams, { getState }) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+    });
 
     if (search) {
       params.append("search", search);
     }
 
-        const response = await api.get (`/api/foods?${params.toString()}`);
+    const response = await api.get(`/api/foods?${params.toString()}`);
     return response.data;
-    }
+  },
 );
 
 const foodSlice = createSlice({
-    name: 'food',
-    initialState: {
-        items: [] as FoodItem[],
-        loading: false,
-        page: 0,
-        totalPages: 1,
-        search: null as string | null,
+  name: "food",
+  initialState: {
+    items: [] as FoodItem[],
+    loading: false,
+    page: 0,
+    totalPages: 1,
+    search: null as string | null,
+  },
+  reducers: {
+    resetFoodItems(state) {
+      state.items = [];
+      state.page = 0;
     },
-    reducers: {
-        resetFoodItems(state) {
-            state.items = [];
-            state.page = 0;
-        }
-    },
-    extraReducers: (builder) => {
+  },
+  extraReducers: (builder) => {
     builder
       // FETCH START
       .addCase(fetchFoodItems.pending, (state, action) => {
