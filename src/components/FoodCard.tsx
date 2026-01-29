@@ -56,6 +56,9 @@ const FoodCard = ({
         )}
       </TouchableOpacity>
       <View style={styles.infoContainer}>
+        {user?.role === "ADMIN" && (
+          <Text style={styles.foodTitle}>{id.toString()}</Text>
+        )}
         <Text style={styles.foodTitle}>{name}</Text>
         <Text style={styles.foodDescription}>{description}</Text>
         <Text style={styles.price}>${price.toFixed(2)}</Text>
