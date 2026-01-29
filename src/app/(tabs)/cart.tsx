@@ -34,34 +34,6 @@ export default function Cart() {
     (state: RootState) => state.auth,
   );
 
-  const item = {
-    orderId: 1024,
-    status: "CREATED",
-    total: 27.1,
-    createdAt: "2026-01-26T18:45:00Z",
-    userEmail: "customer@sushiwasabi.com",
-    items: [
-      {
-        id: 1,
-        name: "Spicy Salmon Roll",
-        quantity: 2,
-        unitPrice: 6.5,
-      },
-      {
-        id: 2,
-        name: "Avocado Maki",
-        quantity: 1,
-        unitPrice: 4.2,
-      },
-      {
-        id: 3,
-        name: "Chicken Teriyaki Bowl",
-        quantity: 1,
-        unitPrice: 9.9,
-      },
-    ],
-  };
-
   useEffect(() => {
     if (authLoading) return;
     if (!user) return;
