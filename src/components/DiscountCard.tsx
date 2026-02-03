@@ -26,6 +26,7 @@ type DiscountCardProps = {
   stackable: boolean;
   onActivate?: () => void;
   activating?: boolean;
+  userId?: string;
 };
 
 const DiscountCard = ({
@@ -40,6 +41,7 @@ const DiscountCard = ({
   minOrderValue,
   stackable,
   onActivate,
+  userId,
   activating = false,
 }: DiscountCardProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -110,6 +112,22 @@ const DiscountCard = ({
               >
                 <Text style={styles.activateText}>
                   {activating ? "DELETING..." : "DELETE"}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {user?.role === "ADMIN" && userId && (
+              <TouchableOpacity
+                style={[
+                  styles.activateBtn,
+                  activating && styles.activateBtnDisabled,
+                ]}
+                onPress={deleteDiscount}
+                disabled={activating}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.activateText}>
+                  {activating ? "USING..." : "USE"}
                 </Text>
               </TouchableOpacity>
             )}
