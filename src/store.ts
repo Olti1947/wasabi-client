@@ -10,6 +10,7 @@ import checkoutReducer from "./features/checkout/checkoutSlice";
 import discountReducer from "./features/discount/discountSlice";
 import foodReducer from "./features/food/foodSlice";
 import orderReducer from "./features/order/orderSlice";
+import qrCodeReducer from "./features/qrScan/qrScanSlice";
 // Persist config
 const persistConfig = {
   key: "root",
@@ -27,6 +28,7 @@ const rootReducer = combineReducers({
   chat: chatReducer,
   adminChat: adminChatReducer,
   order: orderReducer,
+  qrCode: qrCodeReducer,
 });
 
 // Persisted reducer
