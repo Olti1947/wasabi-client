@@ -32,16 +32,16 @@ export const fetchActiveDiscounts = createAsyncThunk(
   },
 );
 
-export const useDiscount = createAsyncThunk(
-  "discounts/useDiscount",
+export const applyDiscount = createAsyncThunk(
+  "discounts/applyDiscount",
   async (
-    { userId, discountId }: { userId: number; discountId: number },
+    { discountId, userId }: { discountId: number; userId: number },
     { rejectWithValue },
   ) => {
     try {
       await api.post("/api/discounts/admin/use", {
-        userId,
         discountId,
+        userId,
       });
     } catch (err: any) {
       return rejectWithValue(err.response?.data || "Use failed");

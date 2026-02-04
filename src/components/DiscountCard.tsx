@@ -1,15 +1,19 @@
+import { useState } from "react";
 import {
-    Alert,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import api from "../api/apiClient";
 import { selectUser } from "../features/auth/authSelectors";
-import { fetchAvailableDiscounts } from "../features/discount/discountSlice";
+import {
+  applyDiscount,
+  fetchAvailableDiscounts,
+} from "../features/discount/discountSlice";
 import { AppDispatch } from "../store";
 import { colors } from "../theme/colors";
 
@@ -46,11 +50,25 @@ const DiscountCard = ({
 }: DiscountCardProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(selectUser);
+
   const deleteDiscount = () => {
     api.delete(`/api/discounts/admin/${id}`);
     Alert.alert("Deleted discount");
     dispatch(fetchAvailableDiscounts());
   };
+
+  const useSelectedDiscount = () => {
+    console.log(userId);
+    console.log(id);
+    if (userId && id) {
+      console.log("I ran: ", userId);
+      const userNum = parseInt(userId);
+      dispatch(applyDiscount({ discountId: id, userId: userNum }));
+    }
+    setApplyDiscountText("USED");
+  };
+
+  const [applyDiscountText, setApplyDiscountText] = useState("USE");
 
   const discountLabel =
     type === "PERCENTAGE" ? `${value}% OFF` : `€${value} OFF`;
@@ -116,19 +134,17 @@ const DiscountCard = ({
               </TouchableOpacity>
             )}
 
-            {user?.role === "ADMIN" && userId && (
+            {user?.role === "ADMIN" && (
               <TouchableOpacity
                 style={[
                   styles.activateBtn,
                   activating && styles.activateBtnDisabled,
                 ]}
-                onPress={deleteDiscount}
+                onPress={useSelectedDiscount}
                 disabled={activating}
                 activeOpacity={0.8}
               >
-                <Text style={styles.activateText}>
-                  {activating ? "USING..." : "USE"}
-                </Text>
+                <Text style={styles.activateText}>{applyDiscountText}</Text>
               </TouchableOpacity>
             )}
           </View>

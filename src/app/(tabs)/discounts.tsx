@@ -343,15 +343,20 @@ export default function Discounts() {
         }}
       >
         {loading && <ActivityIndicator color={colors.primary} />}
-        <View style={styles.adminPanel}>
-          <TouchableOpacity
-            style={styles.adminButton}
-            onPress={() => setOpen(true)}
-          >
-            <Text style={styles.buttonText}>Add Discount</Text>
-          </TouchableOpacity>
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>Admin Panel</Text>
-        </View>
+        {user?.role === "ADMIN" && (
+          <View style={styles.adminPanel}>
+            <TouchableOpacity
+              style={styles.adminButton}
+              onPress={() => setOpen(true)}
+            >
+              <Text style={styles.buttonText}>Add Discount</Text>
+            </TouchableOpacity>
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>
+              Admin Panel
+            </Text>
+          </View>
+        )}
+
         <FlatList
           style={styles.container}
           data={available}

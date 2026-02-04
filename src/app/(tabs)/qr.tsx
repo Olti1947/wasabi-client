@@ -1,7 +1,7 @@
 import DiscountCard from "@/src/components/DiscountCard";
 import {
-    selectQrCodeToken,
-    selectUser,
+  selectQrCodeToken,
+  selectUser,
 } from "@/src/features/auth/authSelectors";
 import { Discount } from "@/src/features/discount/discountTypes";
 import { fetchScanInfo, resetQrCode } from "@/src/features/qrScan/qrScanSlice";
@@ -10,14 +10,14 @@ import { colors } from "@/src/theme/colors";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useEffect } from "react";
 import {
-    ActivityIndicator,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -97,6 +97,7 @@ export default function QrRoute() {
             {selectedUser.discounts!.map((item: Discount, index) => (
               <DiscountCard
                 key={index}
+                id={item.id}
                 title={item.title}
                 description={item.description}
                 imageUrl={item.imageUrl}
@@ -106,6 +107,7 @@ export default function QrRoute() {
                 endsAt={new Date(item.endsAt)}
                 minOrderValue={item.minOrderValue}
                 stackable={item.stackable}
+                userId={selectedUser.id?.toString()}
               />
             ))}
           </ScrollView>
