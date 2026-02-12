@@ -280,7 +280,7 @@ export default function Index() {
         </View>
       )}
 
-      {debouncedSearch.length === 0 && (
+      {debouncedSearch.length === 0 && activeDiscounts.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Active Discounts</Text>
           <HorizontalDiscountList data={activeDiscounts} title="" />
