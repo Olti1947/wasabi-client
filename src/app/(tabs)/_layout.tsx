@@ -1,4 +1,3 @@
-import { selectIsAuthenticated } from "@/src/features/auth/authSelectors";
 import { RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,7 +5,6 @@ import { Redirect, Tabs } from "expo-router";
 import { useSelector } from "react-redux";
 
 export default function TabsLayout() {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
   const { user, loading } = useSelector((state: RootState) => state.auth);
 
   if (!user) {

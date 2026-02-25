@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "268531301243",
+    "project_id": "sushi-wasabi-a43db",
+    "storage_bucket": "sushi-wasabi-a43db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:268531301243:android:2abeb15ed9cd2846239bde",
+        "android_client_info": {
+          "package_name": "com.olti1947.wasabiclient"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFcd_AueEGCn88GcQYSExFdGsBqkKtZ14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
