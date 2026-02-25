@@ -1,18 +1,24 @@
 import api from "@/src/api/apiClient";
+import { selectNotificationToken } from "@/src/features/auth/authSelectors";
 import { logout } from "@/src/features/auth/authSlice";
 import { AppDispatch } from "@/src/store";
 import { StyleSheet, Text, View } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SettingsButton from "../../components/SettingsButton";
 
 export default function Settings() {
   const dispatch = useDispatch<AppDispatch>();
+  const notificationToken = useSelector(selectNotificationToken);
 
   const handleLogout = () => {
     dispatch(logout());
-    api.delete("/api/notification/deleteToken").catch((error) => {
-      console.error("Failed to delete notification token:", error);
-    });
+    api
+      .delete("/api/notification/deleteToken", {
+        params: { token: notificationToken },
+      })
+      .catch((error) => {
+        console.error("Failed to delete notification token:", error);
+      });
   };
 
   return (

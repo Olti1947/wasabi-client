@@ -6,6 +6,7 @@ import {
   selectIsAuthenticated,
   selectUser,
 } from "@/src/features/auth/authSelectors";
+import { setNotificationToken } from "@/src/features/auth/authSlice";
 import { fetchActiveDiscounts } from "@/src/features/discount/discountSlice";
 import { fetchFoodItems } from "@/src/features/food/foodSlice";
 import { AppDispatch, RootState } from "@/src/store";
@@ -189,6 +190,8 @@ export default function Index() {
           token,
           deviceType: Platform.OS,
         });
+
+        dispatch(setNotificationToken(token));
       } else {
         console.log("No token");
       }
