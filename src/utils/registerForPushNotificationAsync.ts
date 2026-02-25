@@ -13,6 +13,16 @@ export async function registerForPushNotificationAsync() {
     });
   }
 
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+
   if (Device.isDevice && Platform.OS !== "web") {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();

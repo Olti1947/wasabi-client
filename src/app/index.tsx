@@ -27,13 +27,5 @@ export default function Index() {
     }
   }, [isAuthenticated]);
 
-  // useEffect(() => {
-  //   registerForPushNotificationAsync().then((token) => {
-  //     if (token) {
-  //       console.log(token);
-  //     } else
-  //   });
-  // },[]);
-
   return <Redirect href="/(auth)/login" />;
 }

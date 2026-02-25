@@ -2,11 +2,15 @@ import api from "@/src/api/apiClient";
 import HorizontalDiscountList from "@/src/components/HorizontalDiscountList";
 import HorizontalFoodList from "@/src/components/HorizontalFoodList";
 import MenuScroll from "@/src/components/MenuScroll";
-import { selectUser } from "@/src/features/auth/authSelectors";
+import {
+  selectIsAuthenticated,
+  selectUser,
+} from "@/src/features/auth/authSelectors";
 import { fetchActiveDiscounts } from "@/src/features/discount/discountSlice";
 import { fetchFoodItems } from "@/src/features/food/foodSlice";
 import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
+import { registerForPushNotificationAsync } from "@/src/utils/registerForPushNotificationAsync";
 import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
@@ -59,6 +63,8 @@ export default function Index() {
   const activeDiscounts = useSelector(
     (state: RootState) => state.discounts.active,
   );
+
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -172,6 +178,22 @@ export default function Index() {
   }
 
   /* ---------------- EFFECTS ---------------- */
+
+  useEffect(() => {
+    registerForPushNotificationAsync().then((token) => {
+      if (!isAuthenticated) return;
+
+      if (token) {
+        console.log(token);
+        api.post("/api/notification/register", {
+          token,
+          deviceType: Platform.OS,
+        });
+      } else {
+        console.log("No token");
+      }
+    });
+  }, [isAuthenticated]);
   useEffect(() => {
     dispatch(fetchActiveDiscounts());
   }, [dispatch]);

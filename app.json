@@ -8,7 +8,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.olti1947.wasabiclient",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "usesCleartextTraffic": true,
@@ -41,7 +45,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "API_URL": "http://192.168.0.136:8080",
+      "API_URL": "http://192.168.1.69:8080",
       "router": {},
       "eas": {
         "projectId": "a385e6ee-531a-4baf-a19c-323cfee77f4b"
