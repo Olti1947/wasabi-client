@@ -3,6 +3,7 @@ import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 import { combineReducers } from "redux";
 import { Persistor, persistReducer, persistStore } from "redux-persist";
 import authReducer from "./features/auth/authSlice";
+import bannerReducer from "./features/banner/bannerSlice";
 import cartReducer from "./features/cart/cartSlice";
 import adminChatReducer from "./features/chat/adminChatSlice";
 import chatReducer from "./features/chat/chatSlice";
@@ -29,6 +30,7 @@ const rootReducer = combineReducers({
   adminChat: adminChatReducer,
   order: orderReducer,
   qrCode: qrCodeReducer,
+  banner: bannerReducer,
 });
 
 // Persisted reducer

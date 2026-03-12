@@ -150,6 +150,7 @@ export const LoginScreen = () => {
                       placeholder="Email"
                       keyboardType="email-address"
                       autoCapitalize="none"
+                      placeholderTextColor={"#999"}
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
                       value={values.email}
@@ -164,6 +165,7 @@ export const LoginScreen = () => {
                     <TextInput
                       style={styles.input}
                       placeholder="Password"
+                      placeholderTextColor={"#999"}
                       secureTextEntry
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
