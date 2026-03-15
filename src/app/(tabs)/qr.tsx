@@ -1,3 +1,4 @@
+import api from "@/src/api/apiClient";
 import DiscountCard from "@/src/components/DiscountCard";
 import {
   selectQrCodeToken,
@@ -8,7 +9,7 @@ import { fetchScanInfo, resetQrCode } from "@/src/features/qrScan/qrScanSlice";
 import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -16,6 +17,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -32,10 +34,35 @@ export default function QrRoute() {
   const { selectedUser, loading } = useSelector(
     (state: RootState) => state.qrCode,
   );
+  const [spendAmount, setSpendAmount] = useState("");
 
   const scan = (qrToken: string) => {
     dispatch(fetchScanInfo(qrToken));
   };
+
+  async function submitSpending() {
+    try {
+      const response = await api.post("/api/admin/qr/add-expense", {
+        userId: selectedUser?.id,
+        amount: parseFloat(spendAmount),
+      });
+
+      const data = response.data;
+
+      if (data.success) {
+        alert(data.message);
+        setSpendAmount("");
+      } else {
+        alert(data.message);
+      }
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("Network error");
+      }
+    }
+  }
 
   const scanNext = () => {
     dispatch(resetQrCode());
@@ -84,6 +111,10 @@ export default function QrRoute() {
       <View style={styles.container}>
         <Text style={styles.email}>Email: {selectedUser.email}</Text>
 
+        <Text style={styles.email}>
+          Total Spending: €{selectedUser.spending?.toFixed(2) || "0.00"}
+        </Text>
+
         <Text style={styles.name}>
           Full Name: {selectedUser.firstName} {selectedUser.lastName}
         </Text>
@@ -112,6 +143,22 @@ export default function QrRoute() {
             ))}
           </ScrollView>
         )}
+        <View style={styles.spendingSection}>
+          <TextInput
+            style={styles.spendingInput}
+            keyboardType="numeric"
+            placeholder="Enter amount spent"
+            placeholderTextColor={"#000"}
+            onChangeText={setSpendAmount}
+            value={spendAmount}
+          ></TextInput>
+          <TouchableOpacity
+            style={styles.spendingButton}
+            onPress={submitSpending}
+          >
+            <Text style={{ color: "#fff" }}>Submit Spending</Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.scanButton} onPress={scanNext}>
           <Text style={{ color: "#fff", fontSize: 16 }}>Scan Next</Text>
         </TouchableOpacity>
@@ -136,6 +183,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  spendingSection: {
+    marginTop: 20,
+    width: "100%",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  spendingInput: {
+    width: "100%",
+    padding: 12,
+    borderColor: "#e0e0e0",
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+
+  spendingButton: {
+    backgroundColor: "#888",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 12,
+  },
   text: {
     marginTop: 20,
     fontSize: 16,

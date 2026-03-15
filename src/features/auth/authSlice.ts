@@ -1,6 +1,15 @@
+import api from "@/src/api/apiClient";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { loginRequest, refreshTokenRequest, signUpRequest } from "./authApi";
 import { AuthResponse, Credentials, SignUpRequest, User } from "./authTypes";
+
+export const fetchSpending = createAsyncThunk(
+  "auth/fetchSpending",
+  async () => {
+    const res = await api.get("/api/me/spending");
+    return res.data;
+  },
+);
 
 export const loginUser = createAsyncThunk<AuthResponse, Credentials>(
   "auth/login",
@@ -46,6 +55,7 @@ const authSlice = createSlice({
     error: null as string | null,
     refreshToken: null as string | null,
     qrCodeToken: null as string | null,
+    spending: null as number | null,
     notificationToken: null as string[] | null,
   },
   reducers: {
@@ -96,6 +106,11 @@ const authSlice = createSlice({
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.token = action.payload.authenticationToken;
         state.refreshToken = action.payload.refreshToken;
+      })
+      .addCase(fetchSpending.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user.spending = action.payload;
+        }
       });
   },
 });
