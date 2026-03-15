@@ -10,6 +10,7 @@ export interface User {
   email: string;
   role: Role;
   qrCodeToken: string;
+  spending: number;
   notificationToken?: string[] | null;
 }
 

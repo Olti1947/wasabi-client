@@ -6,18 +6,23 @@ import { AutoBanner } from "@/src/components/AutoBanner";
 import HorizontalDiscountList from "@/src/components/HorizontalDiscountList";
 import HorizontalFoodList from "@/src/components/HorizontalFoodList";
 import MenuScroll from "@/src/components/MenuScroll";
+import { SpendingBar } from "@/src/components/SpendingBar";
 import {
   selectIsAuthenticated,
   selectUser,
 } from "@/src/features/auth/authSelectors";
-import { setNotificationToken } from "@/src/features/auth/authSlice";
+import {
+  fetchSpending,
+  setNotificationToken,
+} from "@/src/features/auth/authSlice";
 import { fetchBanners } from "@/src/features/banner/bannerSlice";
 import { fetchActiveDiscounts } from "@/src/features/discount/discountSlice";
 import { fetchFoodItems } from "@/src/features/food/foodSlice";
 import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import { registerForPushNotificationAsync } from "@/src/utils/registerForPushNotificationAsync";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   StatusBar,
@@ -97,6 +102,13 @@ export default function Index() {
 
   /* ---------------- EFFECTS ---------------- */
 
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchFoodItems({ page: 0, size: 10, search: "" }));
+      dispatch(fetchSpending());
+    }, [dispatch]),
+  );
+
   useEffect(() => {
     registerForPushNotificationAsync().then((token) => {
       if (!isAuthenticated) return;
@@ -164,6 +176,24 @@ export default function Index() {
         </View>
       )}
 
+      {user?.spending !== null && user?.role === "USER" && (
+        <View style={[styles.section, styles.spendingCard]}>
+          <View style={styles.spendingHeader}>
+            <Text style={styles.sectionTitle}>Your Spending</Text>
+            <Text style={styles.spendingAmount}>
+              ${user?.spending?.toFixed(2)}
+            </Text>
+          </View>
+
+          <SpendingBar spending={user?.spending} />
+
+          <View style={styles.spendingFooter}>
+            <Text style={styles.spendingLabel}>$0</Text>
+            <Text style={styles.spendingLabel}>$100 limit</Text>
+          </View>
+        </View>
+      )}
+
       {debouncedSearch.length === 0 && activeDiscounts.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Active Discounts</Text>
@@ -224,5 +254,43 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     marginLeft: 6,
+  },
+
+  spendingCard: {
+    marginTop: 16,
+    padding: 18,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+
+    elevation: 3,
+    gap: 12,
+  },
+
+  spendingHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 40,
+  },
+
+  spendingAmount: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.primary,
+  },
+
+  spendingFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  spendingLabel: {
+    fontSize: 12,
+    color: "#888",
   },
 });

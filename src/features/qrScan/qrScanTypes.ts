@@ -5,5 +5,6 @@ export interface UserScanInfo {
   email: string | null;
   firstName: string | null;
   lastName: string | null;
+  spending: number | null;
   discounts: Discount[] | null;
 }

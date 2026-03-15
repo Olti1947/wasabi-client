@@ -167,6 +167,7 @@ export default function Cart() {
             <TextInput
               style={styles.input}
               placeholder="Phone Number"
+              placeholderTextColor="#999"
               keyboardType="phone-pad"
               value={phone}
               onChangeText={(text) => setPhone(formatKosovoPhone(text))}
@@ -175,6 +176,7 @@ export default function Cart() {
             <TextInput
               style={[styles.input, { height: 80 }]}
               placeholder="Delivery Address"
+              placeholderTextColor="#999"
               multiline
               value={address}
               onChangeText={setAddress}
