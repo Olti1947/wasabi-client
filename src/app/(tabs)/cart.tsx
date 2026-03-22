@@ -1,9 +1,12 @@
+import api from "@/src/api/apiClient";
 import CartItemComponent from "@/src/components/CartItemComponent";
+import CurrentOrder from "@/src/components/CurrentOrder";
 import OrderComponent from "@/src/components/OrderComponent";
 import {
   selectCartItems,
   selectCartTotalPrice,
 } from "@/src/features/cart/cartSelectors";
+import { fetchCurrentOrder } from "@/src/features/cart/cartSlice";
 import { CartItemRequest } from "@/src/features/cart/cartTypes";
 import {
   getAvailableCoupons,
@@ -13,7 +16,8 @@ import {
 import { fetchOrders } from "@/src/features/order/orderSlice";
 import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   Platform,
   ScrollView,
@@ -30,9 +34,13 @@ export default function Cart() {
   const dispatch = useDispatch<AppDispatch>();
   const cartItems = useSelector(selectCartItems);
   const orders = useSelector((state: RootState) => state.order);
+  const currentOrder = useSelector(
+    (state: RootState) => state.cart.currentOrder,
+  );
   const { user, loading: authLoading } = useSelector(
     (state: RootState) => state.auth,
   );
+  const router = useRouter();
 
   useEffect(() => {
     if (authLoading) return;
@@ -47,6 +55,26 @@ export default function Cart() {
 
     dispatch(getAvailableCoupons(payload));
   }, [cartItems, dispatch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (authLoading) return;
+      if (!user) return;
+      if (user.role === "USER") {
+        dispatch(
+          getAvailableCoupons(
+            cartItems.map((item) => ({
+              foodItemId: item.id,
+              quantity: item.quantity,
+            })),
+          ),
+        );
+        dispatch(fetchCurrentOrder());
+        return;
+      }
+      dispatch(fetchOrders());
+    }, [authLoading, user, dispatch]),
+  );
 
   useEffect(() => {
     if (authLoading) return;
@@ -63,6 +91,7 @@ export default function Cart() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [uiTotal, setUiTotal] = useState(0);
+  const [additionalComments, setAdditionalComments] = useState("");
 
   const setSelectedCoupon = (couponId: number | null) => {
     dispatch(selectCoupon(couponId));
@@ -104,6 +133,19 @@ export default function Cart() {
   const totalPrice = useSelector(selectCartTotalPrice);
 
   const handlePlaceOrder = () => {
+    const orderRequest = {
+      items: cartItems.map((item) => {
+        return {
+          foodItemId: item.id,
+          quantity: item.quantity,
+        };
+      }),
+      phoneNumber: phone,
+      address: address,
+      discountId: selectedCouponId ? selectedCouponId : null,
+      comment: additionalComments ? additionalComments : null,
+    };
+
     if (!phone || !address) {
       setFormError("Please enter phone number and delivery address.");
       return;
@@ -116,9 +158,18 @@ export default function Cart() {
       return;
     }
     setFormError("");
-    alert(
-      `Order placed!\nTotal: $${totalPrice}\nPhone: ${phone}\nAddress: ${address}`,
-    );
+    try {
+      api.post("/api/checkout", orderRequest);
+      alert(
+        `Order placed!\nTotal: $${totalPrice}\nPhone: ${phone}\nAddress: ${address} \n Comment: ${additionalComments || "None"}\n The restaurant will contact you for confirmation. Thank you for your order!`,
+      );
+      setPhone("");
+      setAddress("");
+      setAdditionalComments("");
+    } catch (error) {
+      alert("Failed to place order. Please try again.");
+      setFormError("Failed to place order. Please try again.");
+    }
   };
 
   const formatKosovoPhone = (input: string) => {
@@ -138,6 +189,16 @@ export default function Cart() {
         <Text style={styles.emptyText}>Your cart is empty.</Text>
       </View>
     );
+  }
+
+  if (
+    currentOrder &&
+    currentOrder.orderStatus !== "COMPLETED" &&
+    currentOrder.orderStatus !== "CANCELLED" &&
+    currentOrder.orderStatus !== "REFUNDED" &&
+    user?.role === "USER"
+  ) {
+    return <CurrentOrder />;
   }
 
   if (user?.role === "USER") {
@@ -181,6 +242,16 @@ export default function Cart() {
               value={address}
               onChangeText={setAddress}
             />
+
+            <TextInput
+              style={[styles.input, { height: 80 }]}
+              placeholder="Additional Comments (optional)"
+              placeholderTextColor="#999"
+              multiline
+              value={additionalComments}
+              onChangeText={setAdditionalComments}
+            />
+
             {availableCoupons.length > 0 ? (
               <DropDownPicker
                 open={open}
@@ -257,6 +328,8 @@ export default function Cart() {
                 items={item.items}
                 phoneNumber={item.phoneNumber}
                 address={item.address}
+                comment={item.comment}
+                onPress={() => router.push(`/order/${item.orderId}` as any)}
               />
             );
           })}

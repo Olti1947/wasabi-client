@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
 
   activateText: {
-    color: "#000",
+    color: "#fff",
     fontSize: 12,
     fontWeight: "bold",
   },

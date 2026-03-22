@@ -9,7 +9,8 @@ import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -189,7 +190,13 @@ export default function Discounts() {
     dispatch(fetchAvailableDiscounts());
   }, [dispatch]);
 
-  if (available.length === 0) {
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchAvailableDiscounts());
+    }, [dispatch]),
+  );
+
+  if (available.length === 0 && user?.role !== "ADMIN") {
     return (
       <View
         style={{
@@ -222,12 +229,14 @@ export default function Discounts() {
               placeholder="Title"
               value={title}
               onChangeText={setTitle}
+              placeholderTextColor={"#999"}
             />
             <TextInput
               style={styles.adminInput}
               placeholder="Description"
               value={description}
               onChangeText={setDescription}
+              placeholderTextColor={"#999"}
             />
             <DropDownPicker
               open={drop}
@@ -245,6 +254,7 @@ export default function Discounts() {
               value={value}
               onChangeText={setValue}
               placeholder="Discount Value"
+              placeholderTextColor={"#999"}
             />
             <TextInput
               style={styles.adminInput}
@@ -252,6 +262,7 @@ export default function Discounts() {
               value={minOrderValue}
               onChangeText={setMinOrderValue}
               placeholder="Minimum order amount"
+              placeholderTextColor={"#999"}
             />
             <TouchableOpacity
               onPress={() => setShowStartPicker((prev) => !prev)}
@@ -270,6 +281,7 @@ export default function Discounts() {
                 placeholder="Select discount period"
                 editable={false}
                 pointerEvents="none"
+                placeholderTextColor={"#999"}
               />
             </TouchableOpacity>
 
@@ -309,6 +321,7 @@ export default function Discounts() {
               placeholder="Food Ids (comma separated)"
               value={productIdsInput}
               onChangeText={setProductIdsInput}
+              placeholderTextColor={"#999"}
             />
 
             <TouchableOpacity
