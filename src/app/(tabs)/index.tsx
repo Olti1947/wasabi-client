@@ -50,7 +50,7 @@ const popularData = [
     description: "Spicy miso ramen",
     price: 12.99,
     imageUrl:
-      "https://images.unsplash.com/photo-1543352634-6fcf2b0c9bda?w=1200&h=900&fit=crop",
+      "https://images.unsplash.com/photo-1546069901-eacef0df6022?w=1200&h=900&fit=crop",
   },
   {
     id: 3,
@@ -58,24 +58,6 @@ const popularData = [
     description: "Fresh salmon nigiri",
     price: 9.5,
     imageUrl:
-      "https://images.unsplash.com/photo-1553621042-f6e147245754?w=1200&h=900&fit=crop",
-  },
-];
-
-const bannerImages = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1546069901-eacef0df6022?w=1200&h=900&fit=crop",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1546069901-eacef0df6022?w=1200&h=900&fit=crop",
-  },
-  {
-    id: 3,
-    image:
       "https://images.unsplash.com/photo-1553621042-f6e147245754?w=1200&h=900&fit=crop",
   },
 ];

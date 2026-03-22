@@ -31,6 +31,7 @@ export interface Order {
 
   phoneNumber: string | null;
   address: string | null;
+  comment: string | null;
 
   orderStatus: OrderStatus | null;
   createdAt: string | null;

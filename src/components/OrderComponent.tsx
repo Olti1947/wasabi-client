@@ -13,6 +13,7 @@ type OrderCardProps = {
   userEmail?: string | null; // admin-only
   phoneNumber: string | null;
   address: string | null;
+  comment?: string | null;
   onPress?: () => void;
 };
 
@@ -25,6 +26,7 @@ const OrderCardComponent = ({
   userEmail,
   phoneNumber,
   address,
+  comment,
   onPress,
 }: OrderCardProps) => {
   return (
@@ -46,6 +48,7 @@ const OrderCardComponent = ({
       {userEmail && <Text style={styles.userEmail}>{userEmail}</Text>}
       {phoneNumber && <Text style={styles.phoneNumber}>{phoneNumber}</Text>}
       {address && <Text style={styles.address}>{address}</Text>}
+      {comment && <Text style={styles.address}>Comment: {comment}</Text>}
 
       {/* Items */}
       <View style={styles.itemsContainer}>
