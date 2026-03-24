@@ -1,49 +1,49 @@
-import { FlashList } from '@shopify/flash-list';
+import { FlashList } from "@shopify/flash-list";
 // import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
-  useWindowDimensions // <-- IMPORT THE HOOK
-  ,
-
-
-
-  View
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchFoodItems, resetFoodItems } from '../features/food/foodSlice';
-import { FoodItem } from '../features/food/foodTypes';
-import { AppDispatch } from '../store';
-import FoodCard from './FoodCard';
-
+  useWindowDimensions, // <-- IMPORT THE HOOK
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchFoodItems, resetFoodItems } from "../features/food/foodSlice";
+import { FoodItem } from "../features/food/foodTypes";
+import { AppDispatch } from "../store";
+import FoodCard from "./FoodCard";
 
 // --- CONSTANTS ---
 const MINIMUM_CARD_WIDTH = 180; // Smallest acceptable width for a single card
-const GUTTER_SIZE = 8;        // Margin/Spacing between columns
-const PADDING = 16;           // Horizontal padding of the list content
+const GUTTER_SIZE = 8; // Margin/Spacing between columns
+const PADDING = 16; // Horizontal padding of the list content
 
 interface ImageData {
-    id: string;
-    url: string;
+  id: string;
+  url: string;
 }
 
 interface Page {
-    images: ImageData[];
-    nextPage: number;
+  images: ImageData[];
+  nextPage: number;
 }
 
 interface MenuScrollProps {
-    ListHeaderComponent: React.ReactElement | null;
-    search: string;
+  ListHeaderComponent: React.ReactElement | null;
+  search: string;
+  onEdit?: (id: number) => void;
 }
 
-export default function MenuScroll({ ListHeaderComponent, search }: MenuScrollProps) {
+export default function MenuScroll({
+  ListHeaderComponent,
+  search,
+  onEdit,
+}: MenuScrollProps) {
   const { width: screenWidth } = useWindowDimensions();
   const dispatch = useDispatch<AppDispatch>();
 
-  const { items, loading, page, totalPages} = useSelector(
-    (state: any) => state.food
+  const { items, loading, page, totalPages } = useSelector(
+    (state: any) => state.food,
   );
 
   // Initial load + search change
@@ -66,7 +66,7 @@ export default function MenuScroll({ ListHeaderComponent, search }: MenuScrollPr
     const effectiveWidth = screenWidth - PADDING * 2;
     const numColumns = Math.max(
       1,
-      Math.floor(effectiveWidth / (MINIMUM_CARD_WIDTH + GUTTER_SIZE))
+      Math.floor(effectiveWidth / (MINIMUM_CARD_WIDTH + GUTTER_SIZE)),
     );
 
     const totalGutterWidth = GUTTER_SIZE * (numColumns - 1);
@@ -93,7 +93,7 @@ export default function MenuScroll({ ListHeaderComponent, search }: MenuScrollPr
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={cardWrapperStyle}>
-            <FoodCard {...item} />
+            <FoodCard {...item} onEdit={onEdit} />
           </View>
         )}
         onEndReachedThreshold={0.3}
@@ -108,18 +108,17 @@ export default function MenuScroll({ ListHeaderComponent, search }: MenuScrollPr
   );
 }
 
-
 // Stylesheet only contains static styles now
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'white',
-    },
-    listContent: {
-        paddingHorizontal: PADDING,
-        paddingBottom: 20,
-    },
-    footer: {
-        marginVertical: 20,
-    }
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  listContent: {
+    paddingHorizontal: PADDING,
+    paddingBottom: 20,
+  },
+  footer: {
+    marginVertical: 20,
+  },
 });

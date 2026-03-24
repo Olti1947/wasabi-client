@@ -1,5 +1,6 @@
 import api from "@/src/api/apiClient";
 import { AdminBannerModal } from "@/src/components/AdminBannerModal";
+import { AdminEditFoodModal } from "@/src/components/AdminEditFoodModal";
 import { AdminFoodModal } from "@/src/components/AdminFoodModal";
 import { AdminPanel } from "@/src/components/AdminPanel";
 import { AutoBanner } from "@/src/components/AutoBanner";
@@ -56,6 +57,8 @@ export default function Index() {
 
   const [openFoodModal, setOpenFoodModal] = useState(false);
   const [openBannerModal, setOpenBannerModal] = useState(false);
+  const [openEditFoodModal, setEditFoodModal] = useState(false);
+  const [editId, setEditId] = useState<number | undefined>();
 
   useEffect(() => {
     dispatch(fetchBanners());
@@ -99,6 +102,11 @@ export default function Index() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  const handleEdit = (id: number) => {
+    setEditId(id);
+    setEditFoodModal(true);
+  };
+
   /* ---------------- HEADER ---------------- */
   const ListHeader = (
     <>
@@ -134,7 +142,11 @@ export default function Index() {
       {debouncedSearch.length === 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Popular Dishes</Text>
-          <HorizontalFoodList data={popularFoodItems} title="" />
+          <HorizontalFoodList
+            data={popularFoodItems}
+            title=""
+            onEdit={handleEdit}
+          />
         </View>
       )}
 
@@ -189,6 +201,18 @@ export default function Index() {
         />
       )}
 
+      {openEditFoodModal && (
+        <AdminEditFoodModal
+          visible={openEditFoodModal}
+          cancel={() => setEditFoodModal(false)}
+          refreshFoodList={() => {
+            dispatch(fetchFoodItems({ page: 0, size: 10, search }));
+            dispatch(fetchPopularFoodItems());
+          }}
+          id={editId}
+        />
+      )}
+
       {openBannerModal && (
         <AdminBannerModal
           visible={openBannerModal}
@@ -196,7 +220,11 @@ export default function Index() {
           refreshBannerList={() => dispatch(fetchBanners())}
         />
       )}
-      <MenuScroll ListHeaderComponent={ListHeader} search={debouncedSearch} />
+      <MenuScroll
+        ListHeaderComponent={ListHeader}
+        search={debouncedSearch}
+        onEdit={handleEdit}
+      />
     </SafeAreaView>
   );
 }

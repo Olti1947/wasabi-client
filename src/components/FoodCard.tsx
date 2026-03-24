@@ -16,6 +16,7 @@ type FoodCardProps = {
   imageUrl: string;
   description: string;
   price: number;
+  onEdit?: (id: number) => void;
 };
 
 const FoodCard = ({
@@ -24,12 +25,15 @@ const FoodCard = ({
   imageUrl,
   description,
   price,
+  onEdit,
 }: FoodCardProps) => {
   const [cartText, setCartText] = React.useState("Add to Cart");
   const [deleteText, setDeleteText] = useState("Delete Item");
+  const [editText, setEditText] = useState("Edit Item");
 
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(selectUser);
+
   const handleAddToCart = () => {
     // Handle add to cart action
     dispatch(
@@ -62,15 +66,27 @@ const FoodCard = ({
         <Text style={styles.foodTitle}>{name}</Text>
         <Text style={styles.foodDescription}>{description}</Text>
         <Text style={styles.price}>${price.toFixed(2)}</Text>
-        <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
-          <Text style={styles.buttonText}>{cartText}</Text>
-        </TouchableOpacity>
-        {user?.role === "ADMIN" && (
-          <TouchableOpacity style={styles.deleteButton} onPress={deleteItem}>
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>
-              {deleteText}
-            </Text>
+        {user?.role === "USER" && (
+          <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
+            <Text style={styles.buttonText}>{cartText}</Text>
           </TouchableOpacity>
+        )}
+        {user?.role === "ADMIN" && (
+          <>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                onEdit?.(id);
+              }}
+            >
+              <Text style={styles.buttonText}>{editText}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteButton} onPress={deleteItem}>
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                {deleteText}
+              </Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
     </View>
