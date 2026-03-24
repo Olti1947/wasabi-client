@@ -17,7 +17,10 @@ import {
 } from "@/src/features/auth/authSlice";
 import { fetchBanners } from "@/src/features/banner/bannerSlice";
 import { fetchActiveDiscounts } from "@/src/features/discount/discountSlice";
-import { fetchFoodItems } from "@/src/features/food/foodSlice";
+import {
+  fetchFoodItems,
+  fetchPopularFoodItems,
+} from "@/src/features/food/foodSlice";
 import { AppDispatch, RootState } from "@/src/store";
 import { colors } from "@/src/theme/colors";
 import { registerForPushNotificationAsync } from "@/src/utils/registerForPushNotificationAsync";
@@ -34,34 +37,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 
-/* ---------------- POPULAR DATA ---------------- */
-const popularData = [
-  {
-    id: 1,
-    name: "Sushi Platter",
-    description: "Assorted sushi rolls",
-    price: 25.99,
-    imageUrl:
-      "https://images.unsplash.com/photo-1546069901-eacef0df6022?w=1200&h=900&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Ramen Bowl",
-    description: "Spicy miso ramen",
-    price: 12.99,
-    imageUrl:
-      "https://images.unsplash.com/photo-1546069901-eacef0df6022?w=1200&h=900&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Salmon Nigiri",
-    description: "Fresh salmon nigiri",
-    price: 9.5,
-    imageUrl:
-      "https://images.unsplash.com/photo-1553621042-f6e147245754?w=1200&h=900&fit=crop",
-  },
-];
-
 export default function Index() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -72,6 +47,10 @@ export default function Index() {
   );
 
   const bannerImages = useSelector((state: RootState) => state.banner.banners);
+
+  const popularFoodItems = useSelector(
+    (state: RootState) => state.food.popular,
+  );
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
@@ -88,6 +67,7 @@ export default function Index() {
     useCallback(() => {
       dispatch(fetchFoodItems({ page: 0, size: 10, search: "" }));
       dispatch(fetchSpending());
+      dispatch(fetchPopularFoodItems());
     }, [dispatch]),
   );
 
@@ -154,7 +134,7 @@ export default function Index() {
       {debouncedSearch.length === 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Popular Dishes</Text>
-          <HorizontalFoodList data={popularData} title="" />
+          <HorizontalFoodList data={popularFoodItems} title="" />
         </View>
       )}
 
@@ -176,12 +156,14 @@ export default function Index() {
         </View>
       )}
 
-      {debouncedSearch.length === 0 && activeDiscounts.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Active Discounts</Text>
-          <HorizontalDiscountList data={activeDiscounts} title="" />
-        </View>
-      )}
+      {debouncedSearch.length === 0 &&
+        activeDiscounts.length > 0 &&
+        user?.role === "USER" && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Your Active Discounts</Text>
+            <HorizontalDiscountList data={activeDiscounts} title="" />
+          </View>
+        )}
 
       <View style={[styles.section, { marginBottom: 0 }]}>
         <Text style={styles.sectionTitle}>
@@ -200,9 +182,10 @@ export default function Index() {
         <AdminFoodModal
           visible={openFoodModal}
           cancel={() => setOpenFoodModal(false)}
-          refreshFoodList={() =>
-            dispatch(fetchFoodItems({ page: 0, size: 10, search }))
-          }
+          refreshFoodList={() => {
+            dispatch(fetchFoodItems({ page: 0, size: 10, search }));
+            dispatch(fetchPopularFoodItems());
+          }}
         />
       )}
 
