@@ -25,10 +25,19 @@ export const fetchFoodItems = createAsyncThunk(
   },
 );
 
+export const fetchPopularFoodItems = createAsyncThunk(
+  "food/fetchPopularFoodItems",
+  async () => {
+    const response = await api.get("/api/foods/popular");
+    return response.data;
+  },
+);
+
 const foodSlice = createSlice({
   name: "food",
   initialState: {
     items: [] as FoodItem[],
+    popular: [] as FoodItem[],
     loading: false,
     page: 0,
     totalPages: 1,
@@ -72,8 +81,18 @@ const foodSlice = createSlice({
       // FETCH ERROR
       .addCase(fetchFoodItems.rejected, (state) => {
         state.loading = false;
+      })
+      .addCase(fetchPopularFoodItems.fulfilled, (state, action) => {
+        state.popular = action.payload;
+      })
+      .addCase(fetchPopularFoodItems.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(fetchPopularFoodItems.pending, (state) => {
+        state.loading = true;
       });
   },
 });
+
 export const { resetFoodItems } = foodSlice.actions;
 export default foodSlice.reducer;

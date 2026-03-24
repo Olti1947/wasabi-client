@@ -5,6 +5,7 @@ import {
   Alert,
   Platform,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -28,6 +29,7 @@ export function AdminFoodModal({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
+  const [popular, setPopular] = useState<boolean>(false);
   const [image, setImage] = useState<{
     uri: string;
     name: string;
@@ -39,6 +41,7 @@ export function AdminFoodModal({
     setDescription("");
     setIngredients([]);
     setPrice("");
+    setPopular(false);
     setImage(null);
   }
 
@@ -57,6 +60,7 @@ export function AdminFoodModal({
         description,
         price: parseFloat(price),
         ingredients,
+        popular,
       };
 
       // Matches @RequestPart("data") or @RequestParam("data")
@@ -170,6 +174,17 @@ export function AdminFoodModal({
           }
           placeholderTextColor={"#999"}
         />
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ flex: 1 }}>Popular</Text>
+          <Switch value={popular} onValueChange={setPopular} />
+        </View>
 
         <TouchableOpacity style={styles.adminButton} onPress={pickImage}>
           <Text style={styles.buttonText}>Select Image</Text>
