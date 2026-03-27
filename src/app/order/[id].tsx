@@ -1,4 +1,5 @@
 import api from "@/src/api/apiClient";
+import BackButton from "@/src/components/BackButton";
 import { Order, OrderStatus } from "@/src/features/order/orderTypes";
 import { colors } from "@/src/theme/colors";
 import { useLocalSearchParams } from "expo-router";
@@ -119,6 +120,18 @@ export default function OrderDetails() {
 
   return (
     <ScrollView style={styles.container}>
+      <View
+        style={{
+          height: 60,
+          flexDirection: "row",
+          alignItems: "center",
+          borderBottomWidth: 1,
+          borderBottomColor: "#eee",
+          paddingHorizontal: 0,
+        }}
+      >
+        <BackButton />
+      </View>
       {/* HEADER */}
       <Text style={styles.title}>Order #{order.orderId}</Text>
 
