@@ -10,29 +10,38 @@ import { ActivityIndicator } from "react-native";
 import { useSelector } from "react-redux";
 
 export default function FoodDetailPage() {
- 
-    const { id } = useLocalSearchParams<{id: string}>();
-    const foodId = Number(id);
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const foodId = Number(id);
 
-    const cachedFood = useSelector((state: RootState) => selectFoodItemById(state, foodId));
-    const [food, setFood] = useState<FoodItem | null>(cachedFood ?? null);
-    const [loading, setLoading] = useState(!cachedFood);
+  const cachedFood = useSelector((state: RootState) =>
+    selectFoodItemById(state, foodId),
+  );
+  const [food, setFood] = useState<FoodItem | null>(cachedFood ?? null);
+  const [loading, setLoading] = useState(!cachedFood);
 
-const token = useSelector(selectToken);
+  const token = useSelector(selectToken);
 
-useEffect(() => {
-  if (!cachedFood && token) {
-    api.get(`/api/foods/${foodId}`)
-      .then(res => setFood(res.data))
-      .finally(() => setLoading(false));
-  }
-}, [foodId, token]);
- 
-    if(loading){
-        return <ActivityIndicator color={"green"}/>
+  useEffect(() => {
+    if (!cachedFood && token) {
+      api
+        .get(`/api/foods/${foodId}`)
+        .then((res) => setFood(res.data))
+        .finally(() => setLoading(false));
     }
+  }, [foodId, token]);
 
-    return (
-    <FoodDetails id={food?.id} name={food?.name} imageUrl={food?.imageUrl} description={food?.description} price={food?.price} ingredients={food?.ingredients}/>
-    );
+  if (loading) {
+    return <ActivityIndicator color={"green"} />;
+  }
+
+  return (
+    <FoodDetails
+      id={food?.id}
+      name={food?.name}
+      imageUrl={food?.imageUrl}
+      description={food?.description}
+      price={food?.price}
+      ingredients={food?.ingredients}
+    />
+  );
 }
