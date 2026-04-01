@@ -1,12 +1,34 @@
 import api from "@/src/api/apiClient";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { loginRequest, refreshTokenRequest, signUpRequest } from "./authApi";
-import { AuthResponse, Credentials, SignUpRequest, User } from "./authTypes";
+import {
+  Address,
+  AuthResponse,
+  Credentials,
+  SignUpRequest,
+  User,
+} from "./authTypes";
 
 export const fetchSpending = createAsyncThunk(
   "auth/fetchSpending",
   async () => {
     const res = await api.get("/api/me/spending");
+    return res.data;
+  },
+);
+
+export const fetchUserInfo = createAsyncThunk<User>(
+  "auth/fetchUserInfo",
+  async () => {
+    const res = await api.get("/api/me");
+    return res.data;
+  },
+);
+
+export const fetchUserAddresses = createAsyncThunk<Address[]>(
+  "auth/fetchUserAddresses",
+  async () => {
+    const res = await api.get("/api/me/addresses");
     return res.data;
   },
 );
@@ -57,6 +79,7 @@ const authSlice = createSlice({
     qrCodeToken: null as string | null,
     spending: null as number | null,
     notificationToken: null as string[] | null,
+    addresses: [] as Address[],
   },
   reducers: {
     logout: (state) => {
@@ -111,6 +134,22 @@ const authSlice = createSlice({
         if (state.user) {
           state.user.spending = action.payload;
         }
+      })
+      .addCase(fetchUserInfo.fulfilled, (state, action) => {
+        state.user = action.payload;
+      })
+      .addCase(fetchUserInfo.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) ?? action.error.message ?? null;
+      })
+      .addCase(fetchUserAddresses.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user.addresses = action.payload;
+        }
+      })
+      .addCase(fetchUserAddresses.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) ?? action.error.message ?? null;
       });
   },
 });

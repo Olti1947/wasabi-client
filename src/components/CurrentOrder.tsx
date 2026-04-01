@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentOrder } from "../features/cart/cartSelectors";
 import { fetchCurrentOrder } from "../features/cart/cartSlice";
 import { AppDispatch } from "../store";
+import BackButton from "./BackButton";
 
 export default function CurrentOrder() {
   const dispatch = useDispatch<AppDispatch>();
@@ -68,6 +69,7 @@ export default function CurrentOrder() {
 
   return (
     <ScrollView style={styles.container}>
+      <BackButton />
       {/* HEADER */}
       <Text style={styles.title}>Your Order</Text>
 

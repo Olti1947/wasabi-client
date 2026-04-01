@@ -11,7 +11,18 @@ export interface User {
   role: Role;
   qrCodeToken: string;
   spending: number;
+  phone?: string;
   notificationToken?: string[] | null;
+  addresses?: Address[];
+}
+
+export interface Address {
+  id: number;
+  label: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  isDefault: boolean;
 }
 
 export interface AuthResponse {

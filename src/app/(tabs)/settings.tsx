@@ -2,6 +2,7 @@ import api from "@/src/api/apiClient";
 import { selectNotificationToken } from "@/src/features/auth/authSelectors";
 import { logout } from "@/src/features/auth/authSlice";
 import { AppDispatch } from "@/src/store";
+import { router } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import SettingsButton from "../../components/SettingsButton";
@@ -31,12 +32,16 @@ export default function Settings() {
         <SettingsButton
           title="Personal Info"
           icon="person"
-          onPress={() => {}}
+          onPress={() => {
+            router.push("/settings/personal");
+          }}
         ></SettingsButton>
         <SettingsButton
           title="Addresses"
           icon="location"
-          onPress={() => {}}
+          onPress={() => {
+            router.push("/settings/address" as any);
+          }}
         ></SettingsButton>
       </View>
 
@@ -44,7 +49,9 @@ export default function Settings() {
         <SettingsButton
           title="Cart"
           icon="cart"
-          onPress={() => {}}
+          onPress={() => {
+            router.push("/cart");
+          }}
         ></SettingsButton>
         <SettingsButton
           title="Notifications"
