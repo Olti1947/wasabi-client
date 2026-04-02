@@ -78,7 +78,11 @@ export default function CurrentOrder() {
         <Text
           style={[
             styles.value,
-            { color: getStatusColor(currentOrder.orderStatus!) },
+            {
+              color: getStatusColor(currentOrder.orderStatus!),
+              fontSize: 20,
+              fontWeight: "bold",
+            },
           ]}
         >
           {currentOrder.orderStatus}
