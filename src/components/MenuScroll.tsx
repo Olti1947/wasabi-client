@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 // import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -12,6 +12,7 @@ import { fetchFoodItems, resetFoodItems } from "../features/food/foodSlice";
 import { FoodItem } from "../features/food/foodTypes";
 import { AppDispatch } from "../store";
 import FoodCard from "./FoodCard";
+import SushiAlert from "./SushiAlert";
 
 // --- CONSTANTS ---
 const MINIMUM_CARD_WIDTH = 180; // Smallest acceptable width for a single card
@@ -41,6 +42,15 @@ export default function MenuScroll({
 }: MenuScrollProps) {
   const { width: screenWidth } = useWindowDimensions();
   const dispatch = useDispatch<AppDispatch>();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const handleEditAlert = (tTitle: string, alertMessage: string) => {
+    setAlertTitle(tTitle);
+    setAlertMessage(alertMessage);
+    setAlertVisible(true);
+  };
 
   const { items, loading, page, totalPages } = useSelector(
     (state: any) => state.food,
@@ -84,6 +94,12 @@ export default function MenuScroll({
 
   return (
     <View style={styles.container}>
+      <SushiAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
       <FlashList
         data={items}
         keyExtractor={(item: FoodItem) => item.id.toString()}
@@ -93,7 +109,13 @@ export default function MenuScroll({
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={cardWrapperStyle}>
-            <FoodCard {...item} onEdit={onEdit} />
+            <FoodCard
+              {...item}
+              onEdit={onEdit}
+              onPress={() =>
+                handleEditAlert("Food Added", `${item.name} added to cart!`)
+              }
+            />
           </View>
         )}
         onEndReachedThreshold={0.3}

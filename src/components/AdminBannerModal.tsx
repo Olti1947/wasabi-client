@@ -2,16 +2,16 @@ import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
-  Alert,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import api from "../api/apiClient";
 import { colors } from "../theme/colors";
+import SushiAlert from "./SushiAlert";
 
 interface AdminBannerModalProps {
   visible: boolean;
@@ -30,6 +30,9 @@ export function AdminBannerModal({
     name: string;
     type: string;
   } | null>(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   function resetForm() {
     setDescription("");
@@ -38,7 +41,9 @@ export function AdminBannerModal({
 
   async function submitBanner() {
     if (!image) {
-      Alert.alert("Error", "Please select an image.");
+      setAlertTitle("Error");
+      setAlertMessage("Please select an image.");
+      setAlertVisible(true);
       return;
     }
 
@@ -83,7 +88,9 @@ export function AdminBannerModal({
         transformRequest: (data) => data,
       });
 
-      Alert.alert("Success", "Banner image added successfully!");
+      setAlertTitle("Success");
+      setAlertMessage("Banner image added successfully!");
+      setAlertVisible(true);
       refreshBannerList();
       resetForm();
       cancel();
@@ -93,7 +100,9 @@ export function AdminBannerModal({
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-      Alert.alert("Upload Failed", errorMsg);
+      setAlertTitle("Upload Failed");
+      setAlertMessage(errorMsg);
+      setAlertVisible(true);
     }
   }
 
@@ -101,10 +110,9 @@ export function AdminBannerModal({
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Please allow photo access to upload food images.",
-      );
+      setAlertVisible(true);
+      setAlertTitle("Permission Denied");
+      setAlertMessage("Permission to access media library is required!");
       return;
     }
 
@@ -126,6 +134,12 @@ export function AdminBannerModal({
 
   return (
     <View style={styles.overlay}>
+      <SushiAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
       <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
       <View style={styles.adminModal}>
         <Text style={styles.modalTitle}>Add Banner Image</Text>

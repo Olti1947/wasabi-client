@@ -1,5 +1,6 @@
 import api from "@/src/api/apiClient";
 import DiscountCard from "@/src/components/DiscountCard";
+import SushiAlert from "@/src/components/SushiAlert";
 import {
   selectQrCodeToken,
   selectUser,
@@ -31,6 +32,9 @@ export default function QrRoute() {
   const isPermissionGranted = Boolean(permission?.granted);
   const user = useSelector(selectUser);
   const dispatch = useDispatch<AppDispatch>();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
   const { selectedUser, loading } = useSelector(
     (state: RootState) => state.qrCode,
   );
@@ -50,16 +54,24 @@ export default function QrRoute() {
       const data = response.data;
 
       if (data.success) {
-        alert(data.message);
+        setAlertTitle("Success");
+        setAlertMessage(data.message || "Spending recorded successfully!");
+        setAlertVisible(true);
         setSpendAmount("");
       } else {
-        alert(data.message);
+        setAlertTitle("Error");
+        setAlertMessage(data.message || "Failed to record spending.");
+        setAlertVisible(true);
       }
     } catch (error: any) {
       if (error.response?.data?.message) {
-        alert(error.response.data.message);
+        setAlertTitle("Error");
+        setAlertMessage(error.response.data.message);
+        setAlertVisible(true);
       } else {
-        alert("Network error");
+        setAlertTitle("Error");
+        setAlertMessage("Network error");
+        setAlertVisible(true);
       }
     }
   }
@@ -109,6 +121,12 @@ export default function QrRoute() {
   if (selectedUser) {
     return (
       <View style={styles.container}>
+        <SushiAlert
+          title={alertTitle}
+          message={alertMessage}
+          visible={alertVisible}
+          onConfirm={() => setAlertVisible(false)}
+        />
         <Text style={styles.email}>Email: {selectedUser.email}</Text>
 
         <Text style={styles.email}>

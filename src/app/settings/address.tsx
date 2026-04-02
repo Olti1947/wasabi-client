@@ -1,16 +1,17 @@
 import api from "@/src/api/apiClient";
 import BackButton from "@/src/components/BackButton";
+import SushiAlert from "@/src/components/SushiAlert";
 import { fetchUserAddresses } from "@/src/features/auth/authSlice";
 import { Address } from "@/src/features/auth/authTypes";
 import { AppDispatch } from "@/src/store";
 import React, { useEffect, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -30,10 +31,17 @@ export default function Addresses() {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [isDefault, setIsDefault] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleAddAddress = () => {
-    if (!label || !street || !city || !postalCode) return;
-
+    if (!label || !street || !city || !postalCode) {
+      setAlertTitle("Missing fields");
+      setAlertMessage("Please fill all fields.");
+      setAlertVisible(true);
+      return;
+    }
     const newAddress = {
       label,
       street,
@@ -43,7 +51,9 @@ export default function Addresses() {
     };
 
     api.post("/api/me/address", newAddress).then((response) => {
-      alert(response.data.message || "Address added successfully!");
+      setAlertVisible(true);
+      setAlertTitle("Address Added");
+      setAlertMessage(response.data.message || "Address added successfully!");
       dispatch(fetchUserAddresses());
     });
 
@@ -57,13 +67,21 @@ export default function Addresses() {
 
   const handleDelete = (id: string) => {
     api.delete(`/api/me/address/${id}`).then((response) => {
-      alert(response.data.message || "Address removed successfully!");
+      setAlertVisible(true);
+      setAlertTitle("Address Removed");
+      setAlertMessage(response.data.message || "Address removed successfully!");
       dispatch(fetchUserAddresses());
     });
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <SushiAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
       <BackButton />
       <Text style={styles.title}>Addresses</Text>
 

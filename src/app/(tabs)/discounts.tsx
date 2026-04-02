@@ -1,5 +1,6 @@
 import api from "@/src/api/apiClient";
 import DiscountCard from "@/src/components/DiscountCard";
+import SushiAlert from "@/src/components/SushiAlert";
 import { selectUser } from "@/src/features/auth/authSelectors";
 import {
   activateDiscount,
@@ -13,7 +14,6 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Platform,
   StyleSheet,
@@ -38,6 +38,9 @@ export default function Discounts() {
   const [type, setType] = useState<string>("");
   const [value, setValue] = useState<string>("");
   const [minOrderValue, setMinOrderValue] = useState<string>("");
+  const [pendingDiscountId, setPendingDiscountId] = useState<number | null>(
+    null,
+  );
   const [range, setRange] = useState<{
     startDate: DateType;
     endDate: DateType;
@@ -53,6 +56,9 @@ export default function Discounts() {
   } | null>(null);
 
   const [productIdsInput, setProductIdsInput] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const toBackendDateTime = (date?: Date | null) => {
     if (!date) return null;
@@ -75,10 +81,9 @@ export default function Discounts() {
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Please allow photo access to upload food images.",
-      );
+      setAlertTitle("Permission Denied");
+      setAlertMessage("Permission to access media library is required!");
+      setAlertVisible(true);
       return;
     }
 
@@ -115,7 +120,9 @@ export default function Discounts() {
 
   async function submitDiscount() {
     if (!image) {
-      Alert.alert("Error", "Please select an image.");
+      setAlertTitle("Error");
+      setAlertMessage("Please select an image.");
+      setAlertVisible(true);
       return;
     }
 
@@ -168,7 +175,9 @@ export default function Discounts() {
         transformRequest: (data) => data,
       });
 
-      Alert.alert("Success", "Food added successfully!");
+      setAlertTitle("Success");
+      setAlertMessage("Discount added successfully!");
+      setAlertVisible(true);
       dispatch(fetchAvailableDiscounts());
       cancel();
     } catch (error: any) {
@@ -177,7 +186,9 @@ export default function Discounts() {
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-      Alert.alert("Upload Failed", errorMsg);
+      setAlertTitle("Upload Failed");
+      setAlertMessage(errorMsg);
+      setAlertVisible(true);
     }
   }
 
@@ -216,6 +227,18 @@ export default function Discounts() {
     <>
       {open && (
         <View style={styles.overlay}>
+          <SushiAlert
+            title={alertTitle}
+            message={alertMessage}
+            visible={alertVisible}
+            onConfirm={() => {
+              setAlertVisible(false);
+              if (pendingDiscountId) {
+                dispatch(activateDiscount(pendingDiscountId));
+                setPendingDiscountId(null);
+              }
+            }}
+          />
           <BlurView
             intensity={40}
             tint="dark"
@@ -356,6 +379,12 @@ export default function Discounts() {
         }}
       >
         {loading && <ActivityIndicator color={colors.primary} />}
+        <SushiAlert
+          title={alertTitle}
+          message={alertMessage}
+          visible={alertVisible}
+          onConfirm={() => setAlertVisible(false)}
+        />
         {user?.role === "ADMIN" && (
           <View style={styles.adminPanel}>
             <TouchableOpacity
@@ -388,7 +417,10 @@ export default function Discounts() {
               minOrderValue={item.minOrderValue}
               stackable={item.stackable}
               onActivate={() => {
-                dispatch(activateDiscount(item.id));
+                setAlertTitle("Discount Activated");
+                setAlertMessage(`${item.title} is now active!`);
+                setAlertVisible(true);
+                setPendingDiscountId(item.id);
               }}
               activating={false}
             />

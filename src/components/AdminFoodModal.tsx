@@ -2,7 +2,6 @@ import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
-  Alert,
   Platform,
   StyleSheet,
   Switch,
@@ -13,6 +12,7 @@ import {
 } from "react-native";
 import api from "../api/apiClient";
 import { colors } from "../theme/colors";
+import SushiAlert from "./SushiAlert";
 
 interface AdminFoodModalProps {
   visible: boolean;
@@ -35,6 +35,9 @@ export function AdminFoodModal({
     name: string;
     type: string;
   } | null>(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   function resetForm() {
     setName("");
@@ -47,7 +50,9 @@ export function AdminFoodModal({
 
   async function submitFood() {
     if (!image) {
-      Alert.alert("Error", "Please select an image.");
+      setAlertTitle("Error");
+      setAlertMessage("Please select an image.");
+      setAlertVisible(true);
       return;
     }
 
@@ -96,7 +101,9 @@ export function AdminFoodModal({
         transformRequest: (data) => data,
       });
 
-      Alert.alert("Success", "Food added successfully!");
+      setAlertTitle("Success");
+      setAlertMessage("Food added successfully!");
+      setAlertVisible(true);
       refreshFoodList();
       resetForm();
       cancel();
@@ -106,7 +113,9 @@ export function AdminFoodModal({
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-      Alert.alert("Upload Failed", errorMsg);
+      setAlertTitle("Error");
+      setAlertMessage(errorMsg);
+      setAlertVisible(true);
     }
   }
 
@@ -114,10 +123,9 @@ export function AdminFoodModal({
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Please allow photo access to upload food images.",
-      );
+      setAlertTitle("Permission Denied");
+      setAlertMessage("Permission to access media library is required.");
+      setAlertVisible(true);
       return;
     }
 
@@ -139,6 +147,12 @@ export function AdminFoodModal({
 
   return (
     <View style={styles.overlay}>
+      <SushiAlert
+        title={alertTitle}
+        message={alertMessage}
+        visible={alertVisible}
+        onConfirm={() => setAlertVisible(false)}
+      />
       <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
       <View style={styles.adminModal}>
         <Text style={styles.modalTitle}>Add Food Item</Text>

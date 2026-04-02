@@ -2,11 +2,12 @@ import api from "@/src/api/apiClient";
 import CartItemComponent from "@/src/components/CartItemComponent";
 import CurrentOrder from "@/src/components/CurrentOrder";
 import OrderComponent from "@/src/components/OrderComponent";
+import SushiAlert from "@/src/components/SushiAlert";
 import {
   selectCartItems,
   selectCartTotalPrice,
 } from "@/src/features/cart/cartSelectors";
-import { fetchCurrentOrder } from "@/src/features/cart/cartSlice";
+import { fetchCurrentOrder, resetCart } from "@/src/features/cart/cartSlice";
 import { CartItemRequest } from "@/src/features/cart/cartTypes";
 import {
   getAvailableCoupons,
@@ -92,6 +93,9 @@ export default function Cart() {
   const [value, setValue] = useState(null);
   const [uiTotal, setUiTotal] = useState(0);
   const [additionalComments, setAdditionalComments] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const setSelectedCoupon = (couponId: number | null) => {
     dispatch(selectCoupon(couponId));
@@ -160,14 +164,18 @@ export default function Cart() {
     setFormError("");
     try {
       api.post("/api/checkout", orderRequest);
-      alert(
-        `Order placed!\nTotal: $${totalPrice}\nPhone: ${phone}\nAddress: ${address} \n Comment: ${additionalComments || "None"}\n The restaurant will contact you for confirmation. Thank you for your order!`,
+      setAlertTitle("Order Placed");
+      setAlertMessage(
+        "Your order has been placed successfully! The restaurant will contact you for confirmation. Thank you for your order!",
       );
+      setAlertVisible(true);
       setPhone("");
       setAddress("");
       setAdditionalComments("");
     } catch (error) {
-      alert("Failed to place order. Please try again.");
+      setAlertTitle("Order Failed");
+      setAlertMessage("Failed to place order. Please try again.");
+      setAlertVisible(true);
       setFormError("Failed to place order. Please try again.");
     }
   };
@@ -183,14 +191,6 @@ export default function Cart() {
     return [part1, part2, part3].filter(Boolean).join(" ");
   };
 
-  if (cartItems.length === 0 && user?.role === "USER") {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>Your cart is empty.</Text>
-      </View>
-    );
-  }
-
   if (
     currentOrder &&
     currentOrder.orderStatus !== "COMPLETED" &&
@@ -201,6 +201,14 @@ export default function Cart() {
     return <CurrentOrder />;
   }
 
+  if (cartItems.length === 0 && user?.role === "USER") {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Your cart is empty.</Text>
+      </View>
+    );
+  }
+
   if (user?.role === "USER") {
     return (
       <View
@@ -209,6 +217,17 @@ export default function Cart() {
           paddingTop: Platform.OS === "ios" ? 50 : 20,
         }}
       >
+        <SushiAlert
+          title={alertTitle}
+          message={alertMessage}
+          visible={alertVisible}
+          onConfirm={() => {
+            setAlertVisible(false);
+            dispatch(fetchCurrentOrder());
+            dispatch(resetCart());
+          }}
+        />
+
         <ScrollView contentContainerStyle={styles.container}>
           {cartItems.map((item) => (
             <CartItemComponent
