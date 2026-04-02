@@ -158,7 +158,14 @@ export default function OrderDetails() {
       <View style={styles.card}>
         <Text style={styles.label}>Status</Text>
         <Text
-          style={[styles.value, { color: getStatusColor(order.orderStatus!) }]}
+          style={[
+            styles.value,
+            {
+              color: getStatusColor(order.orderStatus!),
+              fontSize: 20,
+              fontWeight: "bold",
+            },
+          ]}
         >
           {order.orderStatus}
         </Text>
