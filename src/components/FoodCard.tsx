@@ -17,6 +17,7 @@ type FoodCardProps = {
   description: string;
   price: number;
   onEdit?: (id: number) => void;
+  onPress?: () => void;
 };
 
 const FoodCard = ({
@@ -26,6 +27,7 @@ const FoodCard = ({
   description,
   price,
   onEdit,
+  onPress,
 }: FoodCardProps) => {
   const [cartText, setCartText] = React.useState("Add to Cart");
   const [deleteText, setDeleteText] = useState("Delete Item");
@@ -40,6 +42,7 @@ const FoodCard = ({
       addToCart({ id, name, description, price, imageUrl, quantity: 1 }),
     );
     setCartText("Added to Cart ✓");
+    onPress?.();
     setTimeout(() => setCartText("Add to Cart"), 2000);
     console.log(store.getState().cart);
   };

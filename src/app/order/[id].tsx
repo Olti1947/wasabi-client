@@ -1,5 +1,6 @@
 import api from "@/src/api/apiClient";
 import BackButton from "@/src/components/BackButton";
+import SushiAlert from "@/src/components/SushiAlert";
 import { Order, OrderStatus } from "@/src/features/order/orderTypes";
 import { colors } from "@/src/theme/colors";
 import { useLocalSearchParams } from "expo-router";
@@ -22,6 +23,9 @@ export default function OrderDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     async function fetchOrderDetails() {
@@ -55,12 +59,22 @@ export default function OrderDetails() {
         },
       );
 
-      alert(response.data.message || "Status updated successfully");
+      setAlertTitle("Status Updated");
+      setAlertMessage(
+        response.data.message || "Order status updated successfully!",
+      );
+      setAlertVisible(true);
+
       // optimistic update
       setOrder((prev) => (prev ? { ...prev, orderStatus: status } : prev));
-    } catch (err) {
-      console.error("Failed to update status:", err);
-      alert("Failed to update status");
+    } catch (err: any) {
+      setAlertTitle("Update Failed");
+      setAlertMessage(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to update order status.",
+      );
+      setAlertVisible(true);
     } finally {
       setUpdating(false);
     }
@@ -120,6 +134,12 @@ export default function OrderDetails() {
 
   return (
     <ScrollView style={styles.container}>
+      <SushiAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
       <View
         style={{
           height: 60,

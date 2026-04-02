@@ -1,17 +1,17 @@
 import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import api from "../api/apiClient";
 import { FoodItem } from "../features/food/foodTypes";
 import { colors } from "../theme/colors";
+import SushiAlert from "./SushiAlert";
 
 interface AdminFoodModalProps {
   visible: boolean;
@@ -31,6 +31,9 @@ export function AdminEditFoodModal({
   const [price, setPrice] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [popular, setPopular] = useState<boolean>(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     const fetchFood = async () => {
@@ -44,8 +47,9 @@ export function AdminEditFoodModal({
         setIngredients(foodItem.ingredients || []);
         setPopular(foodItem.popular || false);
       } catch (error) {
-        console.error("Error fetching food item:", error);
-        Alert.alert("Error", "Failed to load food item details.");
+        setAlertVisible(true);
+        setAlertTitle("Error");
+        setAlertMessage("Failed to load food item details.");
         cancel();
       }
     };
@@ -74,7 +78,9 @@ export function AdminEditFoodModal({
 
       await api.put("/api/foods/admin/food", formData);
 
-      Alert.alert("Success", "Food added successfully!");
+      setAlertVisible(true);
+      setAlertTitle("Success");
+      setAlertMessage("Food updated successfully!");
       refreshFoodList();
       resetForm();
       cancel();
@@ -84,7 +90,9 @@ export function AdminEditFoodModal({
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-      Alert.alert("Upload Failed", errorMsg);
+      setAlertVisible(true);
+      setAlertTitle("Error");
+      setAlertMessage(errorMsg);
     }
   }
 
@@ -94,6 +102,12 @@ export function AdminEditFoodModal({
 
   return (
     <View style={styles.overlay}>
+      <SushiAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
       <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
       <View style={styles.adminModal}>
         <Text style={styles.modalTitle}>Edit Food Item</Text>

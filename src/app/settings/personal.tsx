@@ -1,5 +1,6 @@
 import api from "@/src/api/apiClient";
 import BackButton from "@/src/components/BackButton";
+import SushiAlert from "@/src/components/SushiAlert";
 import { selectUser } from "@/src/features/auth/authSelectors";
 import { fetchUserInfo } from "@/src/features/auth/authSlice";
 import { AppDispatch } from "@/src/store";
@@ -27,6 +28,9 @@ export default function PersonalInfo() {
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState(user?.phone || "");
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleSave = () => {
     const request = {
@@ -40,17 +44,28 @@ export default function PersonalInfo() {
       api.post("/api/me/edit", request).then((response) => {
         // Optionally, you can update the user in the Redux store here
         // dispatch(updateUser(response.data));
-        alert(response.data.message || "Profile updated successfully!");
+        setAlertTitle("Success");
+        setAlertMessage("Profile updated successfully!");
+        setAlertVisible(true);
       });
       dispatch(fetchUserInfo());
     } catch (error) {
       console.error("Failed to update profile:", error);
-      alert("Failed to update profile. Please try again.");
+      setAlertTitle("Error");
+      setAlertMessage("Failed to update profile. Please try again.");
+      setAlertVisible(true);
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <SushiAlert
+        title={alertTitle}
+        message={alertMessage}
+        visible={alertVisible}
+        onConfirm={() => setAlertVisible(false)}
+      />
+
       <BackButton />
       {/* Header */}
       <Text style={styles.title}>Personal Info</Text>
