@@ -38,7 +38,7 @@ export default function Discounts() {
   const [type, setType] = useState<string>("");
   const [value, setValue] = useState<string>("");
   const [minOrderValue, setMinOrderValue] = useState<string>("");
-  const [pendingDiscountId, setPendingDiscountId] = useState<number | null>(
+  const [onConfirmAction, setOnConfirmAction] = useState<(() => void) | null>(
     null,
   );
   const [range, setRange] = useState<{
@@ -225,20 +225,21 @@ export default function Discounts() {
 
   return (
     <>
+      <SushiAlert
+        title={alertTitle}
+        message={alertMessage}
+        visible={alertVisible}
+        onConfirm={() => {
+          console.log("Alert confirmed");
+          setAlertVisible(false);
+          if (onConfirmAction) {
+            onConfirmAction();
+            setOnConfirmAction(null);
+          }
+        }}
+      />
       {open && (
         <View style={styles.overlay}>
-          <SushiAlert
-            title={alertTitle}
-            message={alertMessage}
-            visible={alertVisible}
-            onConfirm={() => {
-              setAlertVisible(false);
-              if (pendingDiscountId) {
-                dispatch(activateDiscount(pendingDiscountId));
-                setPendingDiscountId(null);
-              }
-            }}
-          />
           <BlurView
             intensity={40}
             tint="dark"
@@ -379,12 +380,6 @@ export default function Discounts() {
         }}
       >
         {loading && <ActivityIndicator color={colors.primary} />}
-        <SushiAlert
-          title={alertTitle}
-          message={alertMessage}
-          visible={alertVisible}
-          onConfirm={() => setAlertVisible(false)}
-        />
         {user?.role === "ADMIN" && (
           <View style={styles.adminPanel}>
             <TouchableOpacity
@@ -420,7 +415,9 @@ export default function Discounts() {
                 setAlertTitle("Discount Activated");
                 setAlertMessage(`${item.title} is now active!`);
                 setAlertVisible(true);
-                setPendingDiscountId(item.id);
+                setOnConfirmAction(
+                  () => () => dispatch(activateDiscount(item.id)),
+                );
               }}
               activating={false}
             />

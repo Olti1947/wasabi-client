@@ -152,6 +152,7 @@ export default function Cart() {
 
     if (!phone || !address) {
       setFormError("Please enter phone number and delivery address.");
+      console.log("Phone error");
       return;
     }
 
@@ -311,7 +312,7 @@ export default function Cart() {
               </View>
             )}
 
-            {error ? (
+            {formError ? (
               <Text style={{ color: "red", marginBottom: 10 }}>
                 {formError}
               </Text>
