@@ -6,11 +6,16 @@ interface FetchFoodParams {
   page?: number;
   size?: number;
   search?: string | null;
+  category?: string;
+  baked?: boolean | null;
 }
 
 export const fetchFoodItems = createAsyncThunk(
   "food/fetchFoodItems",
-  async ({ page = 0, size = 10, search }: FetchFoodParams, { getState }) => {
+  async (
+    { page = 0, size = 10, search, category, baked }: FetchFoodParams,
+    { getState },
+  ) => {
     const params = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
@@ -18,6 +23,14 @@ export const fetchFoodItems = createAsyncThunk(
 
     if (search) {
       params.append("search", search);
+    }
+
+    if (category) {
+      params.append("category", category);
+    }
+
+    if (baked !== undefined && baked !== null) {
+      params.append("baked", String(baked));
     }
 
     const response = await api.get(`/api/foods?${params.toString()}`);

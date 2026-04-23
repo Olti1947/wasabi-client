@@ -14,6 +14,7 @@ type FoodCardProps = {
   id: number;
   name: string;
   imageUrl: string;
+  category: string;
   description: string;
   price: number;
   onEdit?: (id: number) => void;
@@ -25,6 +26,7 @@ const FoodCard = ({
   name,
   imageUrl,
   description,
+  category,
   price,
   onEdit,
   onPress,
@@ -68,6 +70,7 @@ const FoodCard = ({
         )}
         <Text style={styles.foodTitle}>{name}</Text>
         <Text style={styles.foodDescription}>{description}</Text>
+        {category && <Text style={styles.category}> {category}</Text>}
         <Text style={styles.price}>${price.toFixed(2)}</Text>
         {user?.role === "USER" && (
           <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
@@ -106,6 +109,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     margin: 8,
+    zIndex: 0,
     overflow: "hidden",
   },
   imageStyle: {
@@ -129,6 +133,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#666",
     marginBottom: 6,
+  },
+  category: {
+    fontSize: 12,
+    color: colors.white,
+    fontWeight: "600",
+    marginBottom: 6,
+    backgroundColor: colors.primary,
+    alignSelf: "flex-start",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   price: {
     fontSize: 15,

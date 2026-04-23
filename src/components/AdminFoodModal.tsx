@@ -10,7 +10,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { DropDownSelect } from "react-native-simple-dropdown-select";
 import api from "../api/apiClient";
+import { FoodCategory } from "../features/food/foodTypes";
 import { colors } from "../theme/colors";
 import SushiAlert from "./SushiAlert";
 
@@ -19,6 +21,11 @@ interface AdminFoodModalProps {
   refreshFoodList: () => void;
   cancel: () => void;
 }
+
+const dropdownData = Object.values(FoodCategory).map((cat, index) => ({
+  id: index,
+  name: cat,
+}));
 
 export function AdminFoodModal({
   visible,
@@ -29,6 +36,9 @@ export function AdminFoodModal({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([]);
+  const [category, setCategory] = useState<any>(null);
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [baked, setBaked] = useState<boolean>(false);
   const [popular, setPopular] = useState<boolean>(false);
   const [image, setImage] = useState<{
     uri: string;
@@ -66,6 +76,8 @@ export function AdminFoodModal({
         price: parseFloat(price),
         ingredients,
         popular,
+        baked,
+        foodCategory: category?.name || null,
       };
 
       // Matches @RequestPart("data") or @RequestParam("data")
@@ -171,6 +183,23 @@ export function AdminFoodModal({
           onChangeText={setDescription}
           placeholderTextColor={"#999"}
         />
+        <DropDownSelect
+          label="Item Category"
+          toggle={() => setOpenDropdown(!openDropdown)}
+          selectedData={category}
+          data={dropdownData}
+          open={openDropdown}
+          onSelect={(data) => {
+            setCategory(data);
+            setOpenDropdown(false);
+          }}
+          containerStyle={{
+            borderWidth: 1,
+            borderColor: colors.primary,
+            borderRadius: 8,
+            padding: 10,
+          }}
+        />
         <TextInput
           style={styles.adminInput}
           placeholder="Price"
@@ -188,6 +217,17 @@ export function AdminFoodModal({
           }
           placeholderTextColor={"#999"}
         />
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ flex: 1 }}>Baked</Text>
+          <Switch value={baked} onValueChange={setBaked} />
+        </View>
 
         <View
           style={{

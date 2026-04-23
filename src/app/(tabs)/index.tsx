@@ -4,6 +4,7 @@ import { AdminEditFoodModal } from "@/src/components/AdminEditFoodModal";
 import { AdminFoodModal } from "@/src/components/AdminFoodModal";
 import { AdminPanel } from "@/src/components/AdminPanel";
 import { AutoBanner } from "@/src/components/AutoBanner";
+import FilterModal from "@/src/components/FilterModal";
 import HorizontalDiscountList from "@/src/components/HorizontalDiscountList";
 import HorizontalFoodList from "@/src/components/HorizontalFoodList";
 import MenuScroll from "@/src/components/MenuScroll";
@@ -33,6 +34,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -59,6 +61,7 @@ export default function Index() {
   const [openBannerModal, setOpenBannerModal] = useState(false);
   const [openEditFoodModal, setEditFoodModal] = useState(false);
   const [editId, setEditId] = useState<number | undefined>();
+  const [filterModal, setFilterModal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchBanners());
@@ -176,12 +179,53 @@ export default function Index() {
             <HorizontalDiscountList data={activeDiscounts} title="" />
           </View>
         )}
+      {debouncedSearch.length === 0 && (
+        <View style={styles.fullMenuHeader}>
+          <Text style={styles.sectionTitle}>Full Menu</Text>
+
+          {/* Wrap in a View to anchor the absolute popup */}
+          <View
+            style={{
+              position: "relative",
+              zIndex: 9999,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 10,
+              }}
+            >
+              <TouchableOpacity
+                style={styles.filterButton}
+                onPress={() => setFilterModal(!filterModal)} // Toggle instead of just set true
+              >
+                <Text style={{ color: "#fff", fontSize: 18 }}>Filter</Text>
+              </TouchableOpacity>
+              {!filterModal && (
+                <TouchableOpacity
+                  style={styles.filterButton}
+                  onPress={() => {
+                    dispatch(fetchFoodItems({ page: 0, size: 10, search: "" }));
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontSize: 18 }}>Reset</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <FilterModal
+              visible={filterModal}
+              onApply={(filters) => {
+                setFilterModal(false);
+              }}
+            />
+          </View>
+        </View>
+      )}
 
       <View style={[styles.section, { marginBottom: 0 }]}>
         <Text style={styles.sectionTitle}>
-          {debouncedSearch.length > 0
-            ? `Results for “${debouncedSearch}”`
-            : "Full Menu"}
+          {debouncedSearch.length > 0 && `Results for “${debouncedSearch}”`}
         </Text>
       </View>
     </>
@@ -249,6 +293,13 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
 
+  filterButton: {
+    padding: 6,
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+  },
+
   spendingCard: {
     marginTop: 16,
     padding: 18,
@@ -285,5 +336,14 @@ const styles = StyleSheet.create({
   spendingLabel: {
     fontSize: 12,
     color: "#888",
+  },
+  fullMenuHeader: {
+    flex: 1,
+    zIndex: 10,
+    elevation: 10,
+    marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });
