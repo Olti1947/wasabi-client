@@ -1,5 +1,4 @@
 import { FlashList } from "@shopify/flash-list";
-// import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -135,6 +134,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+    zIndex: 0, // Ensure it stays behind the filter popup
   },
   listContent: {
     paddingHorizontal: PADDING,
