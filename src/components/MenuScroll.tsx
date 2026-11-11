@@ -1,0 +1,146 @@
+import { FlashList } from "@shopify/flash-list";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  useWindowDimensions, // <-- IMPORT THE HOOK
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchFoodItems, resetFoodItems } from "../features/food/foodSlice";
+import { FoodItem } from "../features/food/foodTypes";
+import { AppDispatch } from "../store";
+import FoodCard from "./FoodCard";
+import SushiAlert from "./SushiAlert";
+
+// --- CONSTANTS ---
+const MINIMUM_CARD_WIDTH = 180; // Smallest acceptable width for a single card
+const GUTTER_SIZE = 8; // Margin/Spacing between columns
+const PADDING = 16; // Horizontal padding of the list content
+
+interface ImageData {
+  id: string;
+  url: string;
+}
+
+interface Page {
+  images: ImageData[];
+  nextPage: number;
+}
+
+interface MenuScrollProps {
+  ListHeaderComponent: React.ReactElement | null;
+  search: string;
+  onEdit?: (id: number) => void;
+}
+
+export default function MenuScroll({
+  ListHeaderComponent,
+  search,
+  onEdit,
+}: MenuScrollProps) {
+  const { width: screenWidth } = useWindowDimensions();
+  const dispatch = useDispatch<AppDispatch>();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const handleEditAlert = (tTitle: string, alertMessage: string) => {
+    setAlertTitle(tTitle);
+    setAlertMessage(alertMessage);
+    setAlertVisible(true);
+  };
+
+  const { items, loading, page, totalPages } = useSelector(
+    (state: any) => state.food,
+  );
+
+  // Initial load + search change
+  useEffect(() => {
+    dispatch(fetchFoodItems({ page: 0, size: 10, search }));
+  }, [dispatch, search]);
+
+  const loadMore = () => {
+    if (!loading && page + 1 < totalPages) {
+      dispatch(fetchFoodItems({ page: page + 1, size: 10, search }));
+    }
+  };
+
+  const onRefresh = () => {
+    dispatch(resetFoodItems());
+    dispatch(fetchFoodItems({ page: 0, size: 10, search }));
+  };
+
+  const { DYNAMIC_COLUMN_COUNT, cardWrapperStyle } = useMemo(() => {
+    const effectiveWidth = screenWidth - PADDING * 2;
+    const numColumns = Math.max(
+      1,
+      Math.floor(effectiveWidth / (MINIMUM_CARD_WIDTH + GUTTER_SIZE)),
+    );
+
+    const totalGutterWidth = GUTTER_SIZE * (numColumns - 1);
+    const cardWidth = (effectiveWidth - totalGutterWidth) / numColumns;
+
+    return {
+      DYNAMIC_COLUMN_COUNT: numColumns,
+      cardWrapperStyle: {
+        width: cardWidth,
+        marginHorizontal: GUTTER_SIZE / 2,
+        marginBottom: GUTTER_SIZE,
+      },
+    };
+  }, [screenWidth]);
+
+  return (
+    <View style={styles.container}>
+      <SushiAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
+      <FlashList
+        data={items}
+        keyExtractor={(item: FoodItem) => item.id.toString()}
+        numColumns={DYNAMIC_COLUMN_COUNT}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={ListHeaderComponent}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <View style={cardWrapperStyle}>
+            <FoodCard
+              {...item}
+              onEdit={onEdit}
+              onPress={() =>
+                handleEditAlert("Food Added", `${item.name} added to cart!`)
+              }
+            />
+          </View>
+        )}
+        onEndReachedThreshold={0.3}
+        onEndReached={loadMore}
+        ListFooterComponent={
+          loading && page + 1 < totalPages ? (
+            <ActivityIndicator size="large" color="green" />
+          ) : null
+        }
+      />
+    </View>
+  );
+}
+
+// Stylesheet only contains static styles now
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+    zIndex: 0, // Ensure it stays behind the filter popup
+  },
+  listContent: {
+    paddingHorizontal: PADDING,
+    paddingBottom: 20,
+  },
+  footer: {
+    marginVertical: 20,
+  },
+});
