@@ -78,32 +78,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-
-      <Tabs.Screen
-        name="chat"
-        options={{
-          title: "Chat",
-          href: user?.role === "USER" ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="chatbubble-ellipses-outline"
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="adminChat"
-        options={{
-          title: "Admin Chat",
-          href: user?.role === "ADMIN" ? undefined : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles-outline" size={size} color={color} />
-          ),
-        }}
-      />
     </Tabs>
   );
 }

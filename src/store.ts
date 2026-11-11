@@ -5,8 +5,6 @@ import { Persistor, persistReducer, persistStore } from "redux-persist";
 import authReducer from "./features/auth/authSlice";
 import bannerReducer from "./features/banner/bannerSlice";
 import cartReducer from "./features/cart/cartSlice";
-import adminChatReducer from "./features/chat/adminChatSlice";
-import chatReducer from "./features/chat/chatSlice";
 import checkoutReducer from "./features/checkout/checkoutSlice";
 import discountReducer from "./features/discount/discountSlice";
 import foodReducer from "./features/food/foodSlice";
@@ -26,8 +24,6 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   discounts: discountReducer,
   checkout: checkoutReducer,
-  chat: chatReducer,
-  adminChat: adminChatReducer,
   order: orderReducer,
   qrCode: qrCodeReducer,
   banner: bannerReducer,
